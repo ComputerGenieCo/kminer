@@ -132,6 +132,10 @@ set(SOURCE_FILES
     nheqminer/MinerFactory.h
     nheqminer/MinerFactory.cpp
 
+    )
+
+if (USE_CUDA_DJEZO)
+    set(SOURCE_FILES ${SOURCE_FILES}
     # make same path on windows
     #blake shared
     # src
@@ -145,6 +149,7 @@ set(SOURCE_FILES
     blake2/blake2-impl.h
     blake2/blake2-round.h
     )
+endif()
 
 #set(LIBS ${LIBS} ${Threads_LIBRARIES} ${Boost_LIBRARIES})
 set(LIBS ${LIBS} ${Boost_LIBRARIES})
