@@ -11,7 +11,6 @@ see LICENSE file for a full copy of the GNU General Public License
 #include <chrono>
 #include <mutex>
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <boost/log/trivial.hpp>
 
 #define BOOST_LOG_CUSTOM(sev) BOOST_LOG_TRIVIAL(sev) << "api | "
@@ -110,8 +109,9 @@ Client::~Client()
 void Client::Start()
 {
 	boost::asio::async_read_until(m_socket, m_response_buffer, "\n",
-		boost::bind(&Client::ReadResponse, shared_from_this(),
-		boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
+		[this, self = shared_from_this()](const boost::system::error_code& ec, std::size_t bytes_transferred) {
+			ReadResponse(ec, bytes_transferred);
+		});
 }
 
 

@@ -12,7 +12,6 @@ see LICENSE file for a full copy of the GNU General Public License
 #include <iostream>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <mutex>
 #include <thread>
 #include <atomic>

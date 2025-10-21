@@ -29,6 +29,9 @@ if (USE_CUDA_DJEZO)
     message("-- USE_CUDA_DJEZO DEFINED")
 endif()
 
+# Suppress Boost bind deprecation warning
+# add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+
 
 ########
 # LINUX

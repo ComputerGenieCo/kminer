@@ -377,7 +377,9 @@ void ZcashMiner::start()
 	// #3 start OPENCL threads
 	for (size_t i = 0; i < solvers.size(); ++i) {
 		minerThreadActive[i] = true;
-		minerThreads[i] = std::thread(boost::bind(&ZcashMinerThread, this, nThreads, i, solvers[i]));
+		minerThreads[i] = std::thread([this, i, solver = solvers[i]]() {
+			ZcashMinerThread(this, nThreads, i, solver);
+		});
 		if (solvers[i]->GetType() == SolverType::CPU) {
 #ifdef WIN32
 			HANDLE hThread = minerThreads[i].native_handle();
@@ -705,7 +707,9 @@ void Solvers_doBenchmark(int hashes, const std::vector<ISolver *> &solvers) {
 	benchmark_work.lock();
 	// bind benchmark threads
 	for (size_t i = 0; i < solvers.size(); ++i) {
-		bthreads[i] = std::thread(boost::bind(&benchmark_thread, i, solvers[i]));
+		bthreads[i] = std::thread([i, solver = solvers[i]]() {
+			benchmark_thread(i, solver);
+		});
     }
 #ifdef WIN32
     // TODO get back to this sleep

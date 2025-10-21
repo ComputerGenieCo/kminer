@@ -72,6 +72,8 @@ ISolver * MinerFactory::GenCPUSolver([[maybe_unused]] int use_opt) {
 	_solvers.push_back(new CPUSolverXenoncat(use_opt));
 	return _solvers.back();
 #endif
+	// If no CPU solver is enabled, return nullptr
+	return nullptr;
 }
 
 #ifdef USE_CPU_XENONCAT

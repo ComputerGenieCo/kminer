@@ -76,9 +76,9 @@ void cpu_xenoncat::stop(cpu_xenoncat& device_context)
 }
 
 void cpu_xenoncat::solve(const char *tequihash_header,
-	unsigned int tequihash_header_len,
+	[[maybe_unused]] unsigned int tequihash_header_len,
 	const char* nonce,
-	unsigned int nonce_len,
+	[[maybe_unused]] unsigned int nonce_len,
 	std::function<bool()> cancelf,
 	std::function<void(const std::vector<uint32_t>&, size_t, const unsigned char*)> solutionf,
 	std::function<void(void)> hashdonef,

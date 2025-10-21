@@ -16,7 +16,7 @@ struct proof;
 #include "eqcuda.hpp"
 
 
-cuda_djezo::cuda_djezo(int platf_id, int dev_id)
+cuda_djezo::cuda_djezo([[maybe_unused]] int platf_id, int dev_id)
 {
 	device_id = dev_id;
 	getinfo(0, dev_id, m_gpu_name, m_sm_count, m_version);
@@ -57,7 +57,7 @@ int cuda_djezo::getcount()
 	return device_count;
 }
 
-void cuda_djezo::getinfo(int platf_id, int d_id, std::string& gpu_name, int& sm_count, std::string& version)
+void cuda_djezo::getinfo([[maybe_unused]] int platf_id, int d_id, std::string& gpu_name, int& sm_count, std::string& version)
 {
 	//int runtime_version;
 	//checkCudaErrors(cudaRuntimeGetVersion(&runtime_version));
@@ -120,13 +120,13 @@ void cuda_djezo::solve(const char *tequihash_header,
 }
 
 
-void eq_cuda_context_interface::solve(const char *tequihash_header,
-	unsigned int tequihash_header_len,
-	const char* nonce,
-	unsigned int nonce_len,
-	std::function<bool()> cancelf,
-	std::function<void(const std::vector<uint32_t>&, size_t, const unsigned char*)> solutionf,
-	std::function<void()> hashdonef)
+void eq_cuda_context_interface::solve([[maybe_unused]] const char *tequihash_header,
+	[[maybe_unused]] unsigned int tequihash_header_len,
+	[[maybe_unused]] const char* nonce,
+	[[maybe_unused]] unsigned int nonce_len,
+	[[maybe_unused]] std::function<bool()> cancelf,
+	[[maybe_unused]] std::function<void(const std::vector<uint32_t>&, size_t, const unsigned char*)> solutionf,
+	[[maybe_unused]] std::function<void()> hashdonef)
 {
 }
 
