@@ -1,3 +1,12 @@
+/*
+ * This file is part of nheqminer.
+ *
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+ *
+ * Copyright (c) 2025 ComputerGenieCo
+ */
+
 #include "MinerFactory.h"
 
 #include <thread>
@@ -38,18 +47,12 @@ std::vector<ISolver *> MinerFactory::GenerateSolvers(int cpu_threads, int cuda_c
 		else if (hasGpus) --cpu_threads; // decrease number of threads if there are GPU workers
 	}
 
+#ifdef USE_CPU_XENONCAT
 	for (int i = 0; i < cpu_threads; ++i)
 	{
-#ifdef USE_CPU_XENONCAT
-		if (i % 2 == 0) {
-			solversPointers.push_back(GenCPUSolverXenoncat(use_avx2));
-		} else {
-			solversPointers.push_back(GenCPUSolverTromp(use_avx2));
-		}
-#else
-		solversPointers.push_back(GenCPUSolverTromp(use_avx2));
-#endif
+		solversPointers.push_back(GenCPUSolverXenoncat(use_avx2));
 	}
+#endif
 
 	return solversPointers;
 }
@@ -66,22 +69,9 @@ void MinerFactory::ClearAllSolvers() {
 ISolver * MinerFactory::GenCPUSolver(int use_opt) {
     // TODO fix dynamic linking on Linux
 #ifdef    USE_CPU_XENONCAT
-	if (_use_xenoncat) {
-		_solvers.push_back(new CPUSolverXenoncat(use_opt));
-		return _solvers.back();
-	} else {
-		_solvers.push_back(new CPUSolverTromp(use_opt));
-		return _solvers.back();
-	}
-#else
-    _solvers.push_back(new CPUSolverTromp(use_opt));
-    return _solvers.back();
+	_solvers.push_back(new CPUSolverXenoncat(use_opt));
+	return _solvers.back();
 #endif
-}
-
-ISolver * MinerFactory::GenCPUSolverTromp(int use_opt) {
-    _solvers.push_back(new CPUSolverTromp(use_opt));
-    return _solvers.back();
 }
 
 #ifdef USE_CPU_XENONCAT
@@ -92,14 +82,12 @@ ISolver * MinerFactory::GenCPUSolverXenoncat(int use_opt) {
 #endif
 
 ISolver * MinerFactory::GenCUDASolver(int dev_id, int blocks, int threadsperblock) {
-	if (_use_cuda_djezo) {
-		_solvers.push_back(new CUDASolverDjezo(dev_id, blocks, threadsperblock));
-		return _solvers.back();
-	}
-	else {
-		_solvers.push_back(new CUDASolverTromp(dev_id, blocks, threadsperblock));
-		return _solvers.back();
-	}
+#ifdef USE_CUDA_DJEZO
+	_solvers.push_back(new CUDASolverDjezo(dev_id, blocks, threadsperblock));
+	return _solvers.back();
+#endif
+	// If no CUDA solver is enabled, return nullptr
+	return nullptr;
 }
 // no OpenCL solvers at the moment keep for future reference
 ISolver * MinerFactory::GenOPENCLSolver(int platf_id, int dev_id) {

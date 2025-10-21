@@ -16,7 +16,6 @@
 
 #ifndef BOOST_SMALLEST_LAST_VERTEX_ORDERING_HPP
 #define BOOST_SMALLEST_LAST_VERTEX_ORDERING_HPP
-/*
    The smallest-last ordering is defined for the loopless graph G with
    vertices a(j), j = 1,2,...,n where a(j) is the j-th column of A and
    with edge (a(i),a(j)) if and only if columns i and j have a

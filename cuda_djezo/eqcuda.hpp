@@ -1,10 +1,16 @@
+/*
+Copyright (c) 2025 ComputerGenieCo
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+*/
+
 #pragma once
 
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 // #include "device_functions.h"  // Removed - causes issues when included in regular C++ files
-#include "../cpu_tromp/blake2/blake2.h"
+#include "../blake2/blake2.h"
 #include "cuda_djezo.hpp"
 
 #ifdef WIN32

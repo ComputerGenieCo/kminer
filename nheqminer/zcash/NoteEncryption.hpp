@@ -1,4 +1,13 @@
 /*
+ * This file is part of nheqminer.
+ *
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+ *
+ * Copyright (c) 2025 ComputerGenieCo
+ */
+
+/*
 See the Zcash protocol specification for more information.
 https://github.com/zcash/zips/blob/master/protocol/protocol.pdf
 */

@@ -1,4 +1,11 @@
+/*
+Copyright (c) 2025 ComputerGenieCo
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+*/
+
 #include <iostream>
+#include <cctype>
 
 #include "version.h"
 #include "arith_uint256.h"
@@ -53,7 +60,6 @@ namespace keywords = boost::log::keywords;
 
 int use_avx = 0;
 int use_avx2 = 0;
-int use_old_cuda = 0;
 int use_old_xmp = 0;
 
 // TODO move somwhere else
@@ -89,11 +95,11 @@ void print_help()
 	std::cout << std::endl;
 	std::cout << "NVIDIA CUDA settings" << std::endl;
 	std::cout << "\t-ci\t\tCUDA info" << std::endl;
-	std::cout << "\t-cv [ver]\tSet CUDA solver (0 = djeZo, 1 = tromp)" << std::endl;
 	std::cout << "\t-cd [devices]\tEnable CUDA mining on spec. devices" << std::endl;
 	std::cout << "\t-cb [blocks]\tNumber of blocks" << std::endl;
 	std::cout << "\t-ct [tpb]\tNumber of threads per block" << std::endl;
 	std::cout << "Example: -cd 0 2 -cb 12 16 -ct 64 128" << std::endl;
+	std::cout << "         -cd0 -cb12 -ct64" << std::endl;
 	std::cout << std::endl;
 	//std::cout << "OpenCL settings" << std::endl;
 	//std::cout << "\t-oi\t\tOpenCL info" << std::endl;
@@ -110,12 +116,8 @@ void print_help()
 
 void print_cuda_info()
 {
-#if defined(USE_CUDA_DJEZO) || defined(USE_CUDA_TROMP)
 #ifdef USE_CUDA_DJEZO
     int num_devices = cuda_djezo::getcount();
-#elif USE_CUDA_TROMP
-    int num_devices = cuda_tromp::getcount();
-#endif
 
 	std::cout << "Number of CUDA devices found: " << num_devices << std::endl;
 
@@ -123,11 +125,7 @@ void print_cuda_info()
 	{
 		std::string gpuname, version;
 		int smcount;
-#ifdef USE_CUDA_DJEZO
         cuda_djezo::getinfo(0, i, gpuname, smcount, version);
-#elif USE_CUDA_TROMP
-        cuda_tromp::getinfo(0, i, gpuname, smcount, version);
-#endif
 		std::cout << "\t#" << i << " " << gpuname << " | SM version: " << version << " | SM count: " << smcount << std::endl;
 	}
 #endif
@@ -259,15 +257,13 @@ int main(int argc, char* argv[])
 	int log_level = 2;
 	int num_hashes = 200;
 	int api_port = 0;
-	int cuda_device_count = 0;
-	int cuda_bc = 0;
-	int cuda_tbpc = 0;
-	int opencl_platform = 0;
-	int opencl_device_count = 0;
-	int force_cpu_ext = -1;
-	int opencl_t = 0;
-
-	for (int i = 1; i < argc; ++i)
+int cuda_device_count = 0;
+int cuda_bc = 0;
+int cuda_tbpc = 0;
+int opencl_platform = 0;
+int opencl_device_count = 0;
+int force_cpu_ext = -1;
+int opencl_t = 0;	for (int i = 1; i < argc; ++i)
 	{
 		if (argv[i][0] != '-') continue;
 
@@ -280,53 +276,89 @@ int main(int argc, char* argv[])
 			case 'i':
 				print_cuda_info();
 				return 0;
-			case 'v':
-				use_old_cuda = atoi(argv[++i]);
-				break;
 			case 'd':
-				while (cuda_device_count < MAX_INSTANCES && i + 1 < argc)
-				{
-					try
-					{
-						cuda_enabled[cuda_device_count] = std::stol(argv[++i]);
+			{
+				// Check if device numbers are attached to the option (e.g., -cd0)
+				std::string arg = argv[i];
+				if (arg.length() > 3 && isdigit(arg[3])) {
+					// Parse attached number
+					try {
+						cuda_enabled[cuda_device_count] = std::stol(arg.substr(3));
 						++cuda_device_count;
 					}
-					catch (...)
-					{
-						--i;
-						break;
+					catch (...) {
+						// Invalid number, skip
+					}
+				} else {
+					// Parse from next arguments
+					while (cuda_device_count < MAX_INSTANCES && i + 1 < argc) {
+						try {
+							cuda_enabled[cuda_device_count] = std::stol(argv[++i]);
+							++cuda_device_count;
+						}
+						catch (...) {
+							--i;
+							break;
+						}
 					}
 				}
+			}
 				break;
 			case 'b':
-				while (cuda_bc < MAX_INSTANCES && i + 1 < argc)
-				{
-					try
-					{
-						cuda_blocks[cuda_bc] = std::stol(argv[++i]);
+			{
+				// Check if block counts are attached to the option (e.g., -cb12)
+				std::string arg = argv[i];
+				if (arg.length() > 3 && isdigit(arg[3])) {
+					// Parse attached number
+					try {
+						cuda_blocks[cuda_bc] = std::stol(arg.substr(3));
 						++cuda_bc;
 					}
-					catch (...)
-					{
-						--i;
-						break;
+					catch (...) {
+						// Invalid number, skip
+					}
+				} else {
+					// Parse from next arguments
+					while (cuda_bc < MAX_INSTANCES && i + 1 < argc) {
+						try {
+							cuda_blocks[cuda_bc] = std::stol(argv[++i]);
+							++cuda_bc;
+						}
+						catch (...) {
+							--i;
+							break;
+						}
 					}
 				}
+			}
 				break;
 			case 't':
-				while (cuda_tbpc < MAX_INSTANCES && i + 1 < argc)
-				{
-					try
-					{
-						cuda_tpb[cuda_tbpc] = std::stol(argv[++i]);
+			{
+				// Check if thread counts are attached to the option (e.g., -ct64)
+				std::string arg = argv[i];
+				if (arg.length() > 3 && isdigit(arg[3])) {
+					// Parse attached number
+					try {
+						cuda_tpb[cuda_tbpc] = std::stol(arg.substr(3));
 						++cuda_tbpc;
 					}
-					catch (...)
-					{
-						--i;
-						break;
+					catch (...) {
+						// Invalid number, skip
+					}
+				} else {
+					// Parse from next arguments
+					while (cuda_tbpc < MAX_INSTANCES && i + 1 < argc) {
+						try {
+							cuda_tpb[cuda_tbpc] = std::stol(argv[++i]);
+							++cuda_tbpc;
+						}
+						catch (...) {
+							--i;
+							break;
+						}
 					}
 				}
+			}
 				break;
 			}
 			break;
@@ -449,7 +481,7 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		_MinerFactory = new MinerFactory(use_avx == 1, use_old_cuda == 0, use_old_xmp == 0);
+		_MinerFactory = new MinerFactory(use_avx == 1, true, false);
 		if (!benchmark)
 		{
 			if (user.length() == 0)

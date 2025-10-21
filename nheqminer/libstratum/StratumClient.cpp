@@ -1,7 +1,10 @@
-// Copyright (c) 2016 Genoil <jw@meneer.net>
-// Copyright (c) 2016 Jack Grigg <jack@z.cash>
-// Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+/*
+Copyright (c) 2016 Genoil <jw@meneer.net>
+Copyright (c) 2016 Jack Grigg <jack@z.cash>
+Copyright (c) 2025 ComputerGenieCo
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+*/
 
 #include "StratumClient.h"
 #include "version.h"

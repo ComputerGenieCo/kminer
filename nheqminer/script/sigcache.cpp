@@ -1,7 +1,10 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2014 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+/*
+Copyright (c) 2009-2010 Satoshi Nakamoto
+Copyright (c) 2009-2014 The Bitcoin Core developers
+Copyright (c) 2025 ComputerGenieCo
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+*/
 
 #include "sigcache.h"
 

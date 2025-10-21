@@ -1,62 +1,18 @@
 /*
-  Equihash solver created by djeZo (l33tsoftw@gmail.com) for NiceHash
+Equihash solver created by djeZo (l33tsoftw@gmail.com) for NiceHash
+Based on CUDA solver by John Tromp
 
-  Based on CUDA solver by John Tromp released under MIT license.
-
-  Some helper functions taken out of OpenCL solver by Marc Bevand
-  released under MIT license.
-
-  cuda_djezo solver is released by NiceHash (www.nicehash.com) under
-  GPL 3.0 license. If you don't have a copy, you can obtain one from
-  https://www.gnu.org/licenses/gpl-3.0.txt
+Copyright (c) 2016 NiceHash
+Copyright (c) 2025 ComputerGenieCo
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
 */
 
 /*
-The MIT License (MIT)
-
 Copyright (c) 2016 John Tromp
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software, and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
-
-/*
-The MIT License (MIT)
-
 Copyright (c) 2016 Marc Bevand
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software, and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Licensed under MIT license
+see LICENSE.MIT file for a full copy of the MIT License
 */
 
 #ifdef WIN32

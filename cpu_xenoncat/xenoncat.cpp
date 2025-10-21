@@ -1,3 +1,9 @@
+/*
+Copyright (c) 2025 ComputerGenieCo
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+*/
+
 #include <iostream>
 #include <functional>
 #include <vector>

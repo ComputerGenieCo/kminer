@@ -1,4 +1,3 @@
-/*
  [auto_generated]
  boost/numeric/odeint/algebra/algebra_dispatcher.hpp
 

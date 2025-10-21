@@ -4,14 +4,12 @@ A high-performance Equihash miner supporting multiple CPU and GPU solvers.
 
 ## Solver Options
 
-This project supports 4 different solvers:
+This project supports 2 different solvers:
 
 ### CPU Solvers
-- **CPU_TROMP**: Traditional CPU solver (slower, more compatible)
 - **CPU_XENONCAT**: Optimized CPU solver with AVX2 assembly (faster, requires AVX2)
 
 ### GPU Solvers
-- **CUDA_TROMP**: Traditional CUDA GPU solver
 - **CUDA_DJEZO**: Optimized CUDA GPU solver (faster)
 
 ## Quick Start
@@ -29,7 +27,7 @@ sudo apt update
 sudo apt install build-essential cmake libboost-all-dev fasm
 ```
 
-### Clone and Build (Default: CPU_TROMP + CPU_XENONCAT)
+### Clone and Build (Default: CPU_XENONCAT)
 ```bash
 git clone https://github.com/nicehash/nheqminer.git
 cd nheqminer
@@ -68,33 +66,21 @@ make -j$(nproc)
 
 To enable only specific solvers, modify the CMake options:
 
-#### CPU Only (TROMP only)
-```bash
-cmake .. -DUSE_CPU_TROMP=ON -DUSE_CPU_XENONCAT=OFF -DUSE_CUDA_TROMP=OFF -DUSE_CUDA_DJEZO=OFF
-make -j$(nproc)
-```
-
 #### CPU Only (XENONCAT only)
 ```bash
-cmake .. -DUSE_CPU_TROMP=OFF -DUSE_CPU_XENONCAT=ON -DUSE_CUDA_TROMP=OFF -DUSE_CUDA_DJEZO=OFF
-make -j$(nproc)
-```
-
-#### GPU Only (CUDA_TROMP)
-```bash
-cmake .. -DUSE_CPU_TROMP=OFF -DUSE_CPU_XENONCAT=OFF -DUSE_CUDA_TROMP=ON -DUSE_CUDA_DJEZO=OFF
+cmake .. -DUSE_CPU_XENONCAT=ON -DUSE_CUDA_DJEZO=OFF
 make -j$(nproc)
 ```
 
 #### GPU Only (CUDA_DJEZO)
 ```bash
-cmake .. -DUSE_CPU_TROMP=OFF -DUSE_CPU_XENONCAT=OFF -DUSE_CUDA_TROMP=OFF -DUSE_CUDA_DJEZO=ON
+cmake .. -DUSE_CPU_XENONCAT=OFF -DUSE_CUDA_DJEZO=ON
 make -j$(nproc)
 ```
 
 #### CPU + GPU (All solvers)
 ```bash
-cmake .. -DUSE_CPU_TROMP=ON -DUSE_CPU_XENONCAT=ON -DUSE_CUDA_TROMP=ON -DUSE_CUDA_DJEZO=ON
+cmake .. -DUSE_CPU_XENONCAT=ON -DUSE_CUDA_DJEZO=ON
 make -j$(nproc)
 ```
 
@@ -128,7 +114,6 @@ CPU settings
 
 NVIDIA CUDA settings
   -ci    CUDA info
-  -cv [ver]    Set CUDA solver (0 = djeZo, 1 = tromp)
   -cd [devices]    Enable CUDA mining on spec. devices
   -cb [blocks]    Number of blocks
   -ct [tpb]    Number of threads per block
@@ -160,26 +145,6 @@ NVIDIA CUDA settings
 ```bash
 ./nheqminer -l localhost:5332 -u test.worker1 -t 4 -cd 0
 ```
-
-## Performance Comparison
-
-Based on testing with localhost pool (results may vary by hardware):
-
-### CPU Solvers (20 threads)
-- **CPU_XENONCAT**: ~40.13 Sols/s (AVX2 optimized, faster)
-- **CPU_TROMP**: ~22.84 Sols/s (more compatible, slower)
-
-### GPU Solvers (NVIDIA GeForce GTX 1080 Ti)
-- **CUDA_DJEZO**: ~243.72 Sols/s (highly optimized, fastest)
-- **CUDA_TROMP**: ~21.63 Sols/s (traditional CUDA implementation)
-
-### Performance Notes
-
-- **CUDA_DJEZO is ~10x faster** than CPU solutions and should be preferred for GPU mining
-- **CPU_XENONCAT is ~75% faster** than CPU_TROMP but requires AVX2 support
-- **GPU performance** varies significantly by GPU model and memory bandwidth
-- **CPU performance** scales with thread count - use 75% of available cores for optimal results
-- Use actual pool mining to test performance; benchmark mode currently has display issues
 
 ## Troubleshooting
 

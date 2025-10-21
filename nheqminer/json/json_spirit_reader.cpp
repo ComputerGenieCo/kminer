@@ -1,5 +1,9 @@
-//          Copyright John W. Wilkinson 2007 - 2009.
-// Distributed under the MIT License, see accompanying file LICENSE.txt
+/*
+Copyright John W. Wilkinson 2007 - 2009.
+Copyright (c) 2025 ComputerGenieCo
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+*/
 
 // json spirit version 4.03
 

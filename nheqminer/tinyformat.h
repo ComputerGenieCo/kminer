@@ -1,6 +1,11 @@
-// tinyformat.h
-// Copyright (C) 2011, Chris Foster [chris42f (at) gmail (d0t) com]
-//
+/*
+ * This file is part of nheqminer.
+ *
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+ *
+ * Copyright (c) 2025 ComputerGenieCo
+ */
 // Boost Software License - Version 1.0
 //
 // Permission is hereby granted, free of charge, to any person or organization

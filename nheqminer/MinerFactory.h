@@ -1,3 +1,12 @@
+/*
+ * This file is part of nheqminer.
+ *
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+ *
+ * Copyright (c) 2025 ComputerGenieCo
+ */
+
 #pragma once
 
 #include <AvailableSolvers.h>
@@ -23,7 +32,6 @@ private:
 	bool _use_silentarmy = true;
 
 	ISolver * GenCPUSolver(int use_opt);
-	ISolver * GenCPUSolverTromp(int use_opt);
 #ifdef USE_CPU_XENONCAT
 	ISolver * GenCPUSolverXenoncat(int use_opt);
 #endif

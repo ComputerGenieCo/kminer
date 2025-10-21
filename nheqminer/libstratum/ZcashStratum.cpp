@@ -1,6 +1,9 @@
-// Copyright (c) 2016 Jack Grigg <jack@z.cash>
-// Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+/*
+Copyright (c) 2016 Jack Grigg <jack@z.cash>
+Copyright (c) 2025 ComputerGenieCo
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+*/
 
 #include "version.h"
 #include "ZcashStratum.h"
@@ -650,6 +653,18 @@ int benchmark_thread(int tid, ISolver *solver)
 }
 
 void Solvers_doBenchmark(int hashes, const std::vector<ISolver *> &solvers) {
+	// Check if there are any CUDA solvers and increase hashes for accurate measurement
+	bool has_cuda = false;
+	for (ISolver* solver : solvers) {
+		if (solver->GetType() == SolverType::CUDA) {
+			has_cuda = true;
+			break;
+		}
+	}
+	if (has_cuda) {
+		hashes *= 10; // Increase iterations for GPUs to ensure accurate measurement
+	}
+
 	// clear any previous benchmark data
 	for (uint256* nonce : benchmark_nonces) {
 		delete nonce;

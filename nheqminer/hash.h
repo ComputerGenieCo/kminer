@@ -1,6 +1,11 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2013 The Bitcoin Core developers
-// Distributed under the MIT software license, see the accompanying
+/*
+ * This file is part of nheqminer.
+ *
+Licensed under GPL v3.0
+see LICENSE file for a full copy of the GNU General Public License
+ *
+ * Copyright (c) 2025 ComputerGenieCo
+ */
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifndef BITCOIN_HASH_H
