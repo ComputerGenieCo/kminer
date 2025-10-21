@@ -15,10 +15,14 @@ see LICENSE file for a full copy of the GNU General Public License
 #include <string>
 #include <vector>
 
-#ifdef _MSC_VER
-# define _ALIGN(x) __declspec(align(x))
+#if defined(__cplusplus) && __cplusplus >= 201103L
+# define _ALIGN(x) alignas(x)
 #else
-# define _ALIGN(x) __attribute__ ((aligned(x)))
+# ifdef _MSC_VER
+#  define _ALIGN(x) __declspec(align(x))
+# else
+#  define _ALIGN(x) __attribute__ ((aligned(x)))
+# endif
 #endif
 
 /** Template base class for fixed-sized opaque blobs. */

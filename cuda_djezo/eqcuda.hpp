@@ -13,12 +13,8 @@ see LICENSE file for a full copy of the GNU General Public License
 #include "../blake2/blake2.h"
 #include "cuda_djezo.hpp"
 
-#ifdef WIN32
-#define _SNPRINTF _snprintf
-#else
 #include <stdio.h>
 #define _SNPRINTF snprintf
-#endif
 
 #define checkCudaErrors(call)								\
 do {														\

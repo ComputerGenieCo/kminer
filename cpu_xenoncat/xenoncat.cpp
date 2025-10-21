@@ -9,12 +9,8 @@ see LICENSE file for a full copy of the GNU General Public License
 #include <vector>
 #include <stdint.h>
 
-#ifdef WIN32
-#include <Windows.h>
-#else
 #include <string.h>
 #include <stdlib.h>
-#endif
 
 #include "cpu_xenoncat.hpp"
 

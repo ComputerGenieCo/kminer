@@ -21,8 +21,8 @@
 
 #include "blake2-config.h"
 
-#ifdef WIN32
-#include <intrin.h>
+#if defined(__GNUC__) || defined(__clang__)
+# include <x86intrin.h>
 #endif
 
 #include <emmintrin.h>

@@ -236,9 +236,6 @@ void start_mining(int api_port, const std::string& host, const std::string& port
 
 int main(int argc, char* argv[])
 {
-#if defined(WIN32) && defined(NDEBUG)
-	system(""); // windows 10 colored console
-#endif
 
 	std::cout << std::endl;
 	std::cout << "\t==================== www.nicehash.com ====================" << std::endl;
