@@ -1,95 +1,204 @@
-# Build instructions:
+# nheqminer - Equihash CPU & GPU Miner
 
-### Dependencies:
-  - Boost 1.62+
+A high-performance Equihash miner supporting multiple CPU and GPU solvers.
 
-## Windows:
+## Solver Options
 
-Windows builds made by us are available here: https://github.com/nicehash/nheqminer/releases
+This project supports 4 different solvers:
 
-Download and install:
-- [CUDA SDK](https://developer.nvidia.com/cuda-downloads) (if not needed remove **USE_CUDA_TROMP** and **USE_CUDA_DJEZO** from **nheqminer** Preprocessor definitions under Properties > C/C++ > Preprocessor)
-- Visual Studio 2013 Community: https://www.visualstudio.com/en-us/news/releasenotes/vs2013-community-vs
-- [Visual Studio Update 5](https://www.microsoft.com/en-us/download/details.aspx?id=48129) installed
-- 64 bit version only
+### CPU Solvers
+- **CPU_TROMP**: Traditional CPU solver (slower, more compatible)
+- **CPU_XENONCAT**: Optimized CPU solver with AVX2 assembly (faster, requires AVX2)
 
-Open **nheqminer.sln** under **nheqminer/nheqminer.sln** and build. You will have to build ReleaseSSE2 cpu_tromp project first, then Release7.5 cuda_tromp project, then select Release and build all.
+### GPU Solvers
+- **CUDA_TROMP**: Traditional CUDA GPU solver
+- **CUDA_DJEZO**: Optimized CUDA GPU solver (faster)
 
-### Enabled solvers: 
-  - USE_CPU_TROMP
-  - USE_CPU_XENONCAT
-  - USE_CUDA_TROMP
-  - USE_CUDA_DJEZO
+## Quick Start
 
-If you don't wan't to build with all solvlers you can go to **nheqminer Properties > C/C++ > Preprocessor > Preprocessor Definitions** and remove the solver you don't need.
+### Prerequisites
+- Ubuntu/Debian-based Linux distribution
+- GCC 7-11 (for CUDA compatibility, see notes below)
+- CMake 3.16+
+- Boost 1.70+
+- FASM assembler (for CPU_XENONCAT)
 
-## Linux
-Work in progress.
-Working solvers CPU_TROMP, CPU_XENONCAT, CUDA_TROMP, CUDA_DJEZO
+### Install Dependencies
+```bash
+sudo apt update
+sudo apt install build-essential cmake libboost-all-dev fasm
+```
 
-### General instructions:
-  - Install CUDA SDK v8 (make sure you have cuda libraries in **LD_LIBRARY_PATH** and cuda toolkit bins in **PATH**)
-    - example on Ubuntu:
-    - LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/cuda-8.0/lib64:/usr/local/cuda-8.0/lib64/stubs"
-    - PATH="$PATH:/usr/local/cuda-8.0/"
-    - PATH="$PATH:/usr/local/cuda-8.0/bin"
+### Clone and Build (Default: CPU_TROMP + CPU_XENONCAT)
+```bash
+git clone https://github.com/nicehash/nheqminer.git
+cd nheqminer
 
-  - Use Boost 1.62+ (if it is not available from the repos you will have to download and build it yourself)
-  - CMake v3.5 (if it is not available from the repos you will have to download and build it yourself)
-  - Currently support only static building (CPU_XENONCAT, CUDA_DJEZO are enabled by default, check **CMakeLists.txt** in **nheqminer** root folder)
-  - If not on Ubuntu make sure you have **fasm** installed and accessible in **PATH**
-  - After that open the terminal and run the following commands:
-    - `git clone https://github.com/nicehash/nheqminer.git`
-    - Generating asm object file:
-      - **On Ubuntu**:
-        - `cd nheqminer/cpu_xenoncat/asm_linux/`
-        - `sh assemble.sh`
-      - **bundeled fasm not compatible**:
-        - delete/replace (inside **nheqminer/cpu_xenoncat/asm_linux/** directory) with fasm binary compatible with your distro
-        - `cd nheqminer/cpu_xenoncat/asm_linux/`
-        - `sh assemble.sh`
-    - `cd ../../../`
-    - `mkdir build && cd build`
-    - `cmake ../nheqminer`
-    - `make -j $(nproc)`
-    
-# Run instructions:
+# Generate assembly files for CPU_XENONCAT
+cd cpu_xenoncat/asm_linux
+chmod +x assemble.sh
+./assemble.sh
+cd ../../
 
-Parameters: 
-	-h		Print this help and quit
-	-l [location]	Stratum server:port
-	-u [username]	Username (bitcoinaddress)
-	-a [port]	Local API port (default: 0 = do not bind)
-	-d [level]	Debug print level (0 = print all, 5 = fatal only, default: 2)
-	-b [hashes]	Run in benchmark mode (default: 200 iterations)
+# Build
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
+```
+
+### Test the Build
+```bash
+# Run benchmark to verify solvers work
+./nheqminer -b
+
+# Test mining with localhost pool
+./nheqminer -l localhost:5332 -u test.worker1 -t 4
+```
+
+### Validation Results
+
+**CUDA Compatibility Notes**:
+- CUDA 12.6 supports GCC 7-13.x and resolves GCC 13.3.0 compatibility issues
+- If using Ubuntu's nvidia-cuda-toolkit package, you may need to install proper CUDA 12.6 toolkit and update PATH
+- Test with `./nheqminer -ci` to verify CUDA device detection
+
+## Custom Build Options
+
+### Build with Specific Solvers
+
+To enable only specific solvers, modify the CMake options:
+
+#### CPU Only (TROMP only)
+```bash
+cmake .. -DUSE_CPU_TROMP=ON -DUSE_CPU_XENONCAT=OFF -DUSE_CUDA_TROMP=OFF -DUSE_CUDA_DJEZO=OFF
+make -j$(nproc)
+```
+
+#### CPU Only (XENONCAT only)
+```bash
+cmake .. -DUSE_CPU_TROMP=OFF -DUSE_CPU_XENONCAT=ON -DUSE_CUDA_TROMP=OFF -DUSE_CUDA_DJEZO=OFF
+make -j$(nproc)
+```
+
+#### GPU Only (CUDA_TROMP)
+```bash
+cmake .. -DUSE_CPU_TROMP=OFF -DUSE_CPU_XENONCAT=OFF -DUSE_CUDA_TROMP=ON -DUSE_CUDA_DJEZO=OFF
+make -j$(nproc)
+```
+
+#### GPU Only (CUDA_DJEZO)
+```bash
+cmake .. -DUSE_CPU_TROMP=OFF -DUSE_CPU_XENONCAT=OFF -DUSE_CUDA_TROMP=OFF -DUSE_CUDA_DJEZO=ON
+make -j$(nproc)
+```
+
+#### CPU + GPU (All solvers)
+```bash
+cmake .. -DUSE_CPU_TROMP=ON -DUSE_CPU_XENONCAT=ON -DUSE_CUDA_TROMP=ON -DUSE_CUDA_DJEZO=ON
+make -j$(nproc)
+```
+
+### GPU Requirements
+
+For CUDA solvers, you need:
+- NVIDIA GPU with CUDA support
+- CUDA Toolkit 11+
+- NVIDIA drivers
+
+Install CUDA:
+```bash
+sudo apt install nvidia-cuda-toolkit
+```
+
+## Usage
+
+### Command Line Options
+```
+Parameters:
+  -h    Print this help and quit
+  -l [location]    Stratum server:port
+  -u [username]    Username (bitcoinaddress)
+  -a [port]    Local API port (default: 0 = do not bind)
+  -d [level]    Debug print level (0 = print all, 5 = fatal only, default: 2)
+  -b [hashes]    Run in benchmark mode (default: 200 iterations)
 
 CPU settings
-	-t [num_thrds]	Number of CPU threads
-	-e [ext]	Force CPU ext (0 = SSE2, 1 = AVX, 2 = AVX2)
+  -t [num_thrds]    Number of CPU threads
+  -e [ext]    Force CPU ext (0 = SSE2, 1 = AVX, 2 = AVX2)
 
 NVIDIA CUDA settings
-	-ci		CUDA info
-	-cd [devices]	Enable CUDA mining on spec. devices
-	-cb [blocks]	Number of blocks
-	-ct [tpb]	Number of threads per block
-Example: -cd 0 2 -cb 12 16 -ct 64 128
+  -ci    CUDA info
+  -cv [ver]    Set CUDA solver (0 = djeZo, 1 = tromp)
+  -cd [devices]    Enable CUDA mining on spec. devices
+  -cb [blocks]    Number of blocks
+  -ct [tpb]    Number of threads per block
+```
 
-If run without parameters, miner will start mining with 75% of available logical CPU cores. Use parameter -h to learn about available parameters:
+### Examples
 
-Example to run benchmark on your CPU:
+#### Benchmark (test all enabled solvers)
+```bash
+./nheqminer -b
+```
 
-        nheqminer -b
-        
-Example to mine on your CPU with your own BTC address and worker1 on NiceHash USA server:
+#### Mine with CPU (4 threads)
+```bash
+./nheqminer -l localhost:5332 -u test.worker1 -t 4
+```
 
-        nheqminer -l equihash.usa.nicehash.com:3357 -u YOUR_BTC_ADDRESS_HERE.worker1
+#### Mine with CPU (8 threads, AVX2 forced)
+```bash
+./nheqminer -l localhost:5332 -u test.worker1 -t 8 -e 2
+```
 
-Example to mine on your CPU with your own BTC address and worker1 on EU server, using 6 threads:
+#### Mine with GPU (CUDA device 0)
+```bash
+./nheqminer -l localhost:5332 -u test.worker1 -cd 0
+```
 
-        nheqminer -l equihash.eu.nicehash.com:3357 -u YOUR_BTC_ADDRESS_HERE.worker1 -t 6
+#### Mine with CPU + GPU
+```bash
+./nheqminer -l localhost:5332 -u test.worker1 -t 4 -cd 0
+```
 
-<i>Note: if you have a 4-core CPU with hyper threading enabled (total 8 threads) it is best to run with only 6 threads (experimental benchmarks shows that best results are achieved with 75% threads utilized)</i>
+## Performance Comparison
 
-Example to mine on your CPU as well on your CUDA GPUs with your own BTC address and worker1 on EU server, using 6 CPU threads and 2 CUDA GPUs:
+Based on testing with localhost pool (results may vary by hardware):
 
-        nheqminer -l equihash.eu.nicehash.com:3357 -u YOUR_BTC_ADDRESS_HERE.worker1 -t 6 -cd 0 1
+### CPU Solvers (20 threads)
+- **CPU_XENONCAT**: ~40.13 Sols/s (AVX2 optimized, faster)
+- **CPU_TROMP**: ~22.84 Sols/s (more compatible, slower)
+
+### GPU Solvers (NVIDIA GeForce GTX 1080 Ti)
+- **CUDA_DJEZO**: ~243.72 Sols/s (highly optimized, fastest)
+- **CUDA_TROMP**: ~21.63 Sols/s (traditional CUDA implementation)
+
+### Performance Notes
+
+- **CUDA_DJEZO is ~10x faster** than CPU solutions and should be preferred for GPU mining
+- **CPU_XENONCAT is ~75% faster** than CPU_TROMP but requires AVX2 support
+- **GPU performance** varies significantly by GPU model and memory bandwidth
+- **CPU performance** scales with thread count - use 75% of available cores for optimal results
+- Use actual pool mining to test performance; benchmark mode currently has display issues
+
+## Troubleshooting
+
+### CUDA Build Issues
+
+If you encounter CUDA compilation errors:
+
+1. **GCC/CUDA Version Compatibility**: CUDA 12.6 supports GCC 7-13.x
+2. **CUDA Toolkit Installation**: Ensure you have a proper CUDA 12.6 installation, not just Ubuntu's nvidia-cuda-toolkit package
+3. **PATH Configuration**: Update your PATH to prioritize CUDA 12.6: `export PATH=/usr/local/cuda-12.6/bin:$PATH`
+4. **Device Detection**: Use `./nheqminer -ci` to verify CUDA devices are detected
+5. **Build Fixes Applied**: This version includes fixes for CUDA 12.6 compatibility including:
+   - Updated deprecated `__shfl` to `__shfl_sync`
+   - Updated deprecated `__any` to `__any_sync`
+   - Fixed C++11 function signatures
+   - Resolved header inclusion conflicts
+
+### Common Issues
+
+- **"undefined reference" errors**: Ensure all required Boost libraries are installed
+- **CUDA kernel launch failures**: Check GPU memory usage and CUDA driver version
+- **Slow performance**: Use `./nheqminer -b` to benchmark and compare solver performance

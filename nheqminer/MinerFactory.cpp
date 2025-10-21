@@ -40,7 +40,15 @@ std::vector<ISolver *> MinerFactory::GenerateSolvers(int cpu_threads, int cuda_c
 
 	for (int i = 0; i < cpu_threads; ++i)
 	{
-		solversPointers.push_back(GenCPUSolver(use_avx2));
+#ifdef USE_CPU_XENONCAT
+		if (i % 2 == 0) {
+			solversPointers.push_back(GenCPUSolverXenoncat(use_avx2));
+		} else {
+			solversPointers.push_back(GenCPUSolverTromp(use_avx2));
+		}
+#else
+		solversPointers.push_back(GenCPUSolverTromp(use_avx2));
+#endif
 	}
 
 	return solversPointers;
@@ -70,6 +78,18 @@ ISolver * MinerFactory::GenCPUSolver(int use_opt) {
     return _solvers.back();
 #endif
 }
+
+ISolver * MinerFactory::GenCPUSolverTromp(int use_opt) {
+    _solvers.push_back(new CPUSolverTromp(use_opt));
+    return _solvers.back();
+}
+
+#ifdef USE_CPU_XENONCAT
+ISolver * MinerFactory::GenCPUSolverXenoncat(int use_opt) {
+    _solvers.push_back(new CPUSolverXenoncat(use_opt));
+    return _solvers.back();
+}
+#endif
 
 ISolver * MinerFactory::GenCUDASolver(int dev_id, int blocks, int threadsperblock) {
 	if (_use_cuda_djezo) {

@@ -1764,7 +1764,7 @@ __global__ void digit_last_wdc(equi<RB, SM>* eq)
 		susp[32 + lane] = 0xffffffff;
 
 #define CHECK_DUP(a) \
-	__any(atomicExch(&susp[(ind[a] & ((1 << DUPBITS) - 1))], (ind[a] >> DUPBITS)) == (ind[a] >> DUPBITS))
+	__any_sync(0xFFFFFFFF, atomicExch(&susp[(ind[a] & ((1 << DUPBITS) - 1))], (ind[a] >> DUPBITS)) == (ind[a] >> DUPBITS))
 
 		u32 f2 = buck_v4[slot1_v4].hash[1];
 		const slottiny* buck_v3_1 = &eq->round2trees[PACKER::get_bucketid(f2, RB, SM)].treestiny[0];
@@ -1890,7 +1890,7 @@ __global__ void digit_last_wdc(equi<RB, SM>* eq)
 		{
 			soli = atomicAdd(&eq->edata.srealcont.nsols, 1);
 		}
-		soli = __shfl(soli, 0);
+		soli = __shfl_sync(0xFFFFFFFF, soli, 0);
 
 		if (soli < MAXREALSOLS)
 		{

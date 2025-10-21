@@ -212,6 +212,7 @@ void start_mining(int api_port, const std::string& host, const std::string& port
 	});
 
 	handler = &sc;
+	scSig = &sc;
 	signal(SIGINT, stratum_sigint_handler);
 
 	int c = 0;
@@ -250,8 +251,8 @@ int main(int argc, char* argv[])
 	std::cout << "\t==================== www.nicehash.com ====================" << std::endl;
 	std::cout << std::endl;
 
-	std::string location = "equihash.eu.nicehash.com:3357";
-	std::string user = "34HKWdzLxWBduUfJE9JxaFhoXnfC6gmePG";
+	std::string location = "localhost:5332";
+	std::string user = "RCGxKMDxZcBGRZkxvgCRAXGpiQFt8wU7Wq";
 	std::string password = "x";
 	int num_threads = 0;
 	bool benchmark = false;
@@ -468,7 +469,9 @@ int main(int argc, char* argv[])
 		}
 		else
 		{
-			Solvers_doBenchmark(num_hashes, _MinerFactory->GenerateSolvers(num_threads, cuda_device_count, cuda_enabled, cuda_blocks, cuda_tpb, opencl_device_count, opencl_platform, opencl_enabled, opencl_threads));
+			// For benchmark mode, if no threads specified, use automatic detection (-1)
+			int bench_threads = (num_threads == 0) ? -1 : num_threads;
+			Solvers_doBenchmark(num_hashes, _MinerFactory->GenerateSolvers(bench_threads, cuda_device_count, cuda_enabled, cuda_blocks, cuda_tpb, opencl_device_count, opencl_platform, opencl_enabled, opencl_threads));
 		}
 	}
 	catch (std::runtime_error& er)

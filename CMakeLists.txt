@@ -1,15 +1,16 @@
 project(nheqminer)
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11") #  -Wall
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Enable solvers here
 #### older slower
-option(USE_CPU_TROMP "USE CPU_TROMP" OFF)
+option(USE_CPU_TROMP "USE CPU_TROMP" ON)
 option(USE_CUDA_TROMP "USE CUDA_TROMP" OFF)
 #### faster
 option(USE_CPU_XENONCAT "USE CPU_XENONCAT" ON)
-option(USE_CUDA_DJEZO "USE CUDA_DJEZO" ON)
+option(USE_CUDA_DJEZO "USE CUDA_DJEZO" OFF)
 
 ## Add solvers here
 if (USE_CPU_TROMP)
@@ -17,6 +18,14 @@ if (USE_CPU_TROMP)
     message("-- USE_CPU_TROMP DEFINED")
 endif()
 if (USE_CPU_XENONCAT)
+    add_custom_command(
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.o
+               ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.o
+        COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux && ./assemble.sh
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.asm
+                ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.asm
+                ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/assemble.sh
+    )
     add_definitions(-DUSE_CPU_XENONCAT)
     message("-- USE_CPU_XENONCAT DEFINED")
 endif()
@@ -32,17 +41,10 @@ endif()
 
 ########
 # LINUX
-if(CMAKE_COMPILER_IS_GNUCXX)
-#    # use native cpu features
-#    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native -fPIC")
-#    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -fPIC")
-
-#    # optimizations
-#    add_definitions(-O3)
-
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     # use
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 -msse2")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -msse2")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64 -msse2 -fPIC -Wall -Wextra")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64 -msse2 -fPIC -Wall -Wextra")
     # optimizations
     add_definitions(-O2)
 endif()
@@ -184,9 +186,9 @@ if (USE_CPU_TROMP)
 endif()
 if (USE_CPU_XENONCAT)
     add_library ( xenoncat_avx1 SHARED IMPORTED GLOBAL )
-    set_target_properties ( xenoncat_avx1 PROPERTIES IMPORTED_LOCATION "../nheqminer/cpu_xenoncat/asm_linux/equihash_avx1.o" )
+    set_target_properties ( xenoncat_avx1 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.o" )
     add_library ( xenoncat_avx2 SHARED IMPORTED GLOBAL )
-    set_target_properties ( xenoncat_avx2 PROPERTIES IMPORTED_LOCATION "../nheqminer/cpu_xenoncat/asm_linux/equihash_avx2.o" )
+    set_target_properties ( xenoncat_avx2 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.o" )
     target_link_libraries(${PROJECT_NAME} cpu_xenoncat xenoncat_avx1 xenoncat_avx2)
 endif()
 if (USE_CUDA_TROMP)

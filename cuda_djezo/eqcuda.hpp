@@ -3,7 +3,7 @@
 #include "cuda.h"
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
-#include "device_functions_decls.h"
+// #include "device_functions.h"  // Removed - causes issues when included in regular C++ files
 #include "../cpu_tromp/blake2/blake2.h"
 #include "cuda_djezo.hpp"
 
@@ -68,7 +68,7 @@ struct eq_cuda_context_interface
 		unsigned int nonce_len,
 		std::function<bool()> cancelf,
 		std::function<void(const std::vector<uint32_t>&, size_t, const unsigned char*)> solutionf,
-		std::function<void(void)> hashdonef);
+		std::function<void()> hashdonef);
 };
 
 
@@ -91,7 +91,7 @@ struct eq_cuda_context : public eq_cuda_context_interface
 		unsigned int nonce_len,
 		std::function<bool()> cancelf,
 		std::function<void(const std::vector<uint32_t>&, size_t, const unsigned char*)> solutionf,
-		std::function<void(void)> hashdonef);
+		std::function<void()> hashdonef);
 };
 
 #define CONFIG_MODE_1	9, 1248, 12, 640, packer_cantor

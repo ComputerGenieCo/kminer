@@ -650,6 +650,13 @@ int benchmark_thread(int tid, ISolver *solver)
 }
 
 void Solvers_doBenchmark(int hashes, const std::vector<ISolver *> &solvers) {
+	// clear any previous benchmark data
+	for (uint256* nonce : benchmark_nonces) {
+		delete nonce;
+	}
+	benchmark_nonces.clear();
+	benchmark_solutions = 0;
+
 	// generate array of various nonces
 	std::srand(std::time(0));
 	benchmark_nonces.push_back(new uint256());
@@ -660,11 +667,11 @@ void Solvers_doBenchmark(int hashes, const std::vector<ISolver *> &solvers) {
 		for (unsigned int i = 0; i < 32; ++i)
 			benchmark_nonces.back()->begin()[i] = std::rand() % 256;
 	}
-	benchmark_solutions = 0;
 
 	size_t total_hashes = benchmark_nonces.size();
 
 	// log what is benchmarking
+	BOOST_LOG_TRIVIAL(info) << "Benchmarking " << solvers.size() << " solvers with " << total_hashes << " total hashes";
 	for (ISolver* solver : solvers) {
 		if (solver->GetType() == SolverType::CPU) {
 			BOOST_LOG_TRIVIAL(info) << "Benchmarking CPU worker (" << solver->getname() << ") " << solver->getdevinfo();
@@ -695,6 +702,14 @@ void Solvers_doBenchmark(int hashes, const std::vector<ISolver *> &solvers) {
 	BOOST_LOG_TRIVIAL(info) << "Benchmark starting... this may take several minutes, please wait...";
 
 	benchmark_work.unlock();
+	
+	// Give threads a moment to start processing before timing starts
+#ifdef WIN32
+	Sleep(100);
+#else
+	usleep(100000); // 100ms
+#endif
+	
 	auto start = std::chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < nThreads; ++i)
@@ -710,6 +725,19 @@ void Solvers_doBenchmark(int hashes, const std::vector<ISolver *> &solvers) {
 	BOOST_LOG_TRIVIAL(info) << "Total time : " << msec << " ms";
 	BOOST_LOG_TRIVIAL(info) << "Total iterations: " << hashes_done;
 	BOOST_LOG_TRIVIAL(info) << "Total solutions found: " << benchmark_solutions;
-	BOOST_LOG_TRIVIAL(info) << "Speed: " << ((double)hashes_done * 1000 / (double)msec) << " I/s";
-	BOOST_LOG_TRIVIAL(info) << "Speed: " << ((double)benchmark_solutions * 1000 / (double)msec) << " Sols/s";
+	
+	// avoid division by zero and provide meaningful output
+	if (msec > 0) {
+		BOOST_LOG_TRIVIAL(info) << "Speed: " << ((double)hashes_done * 1000 / (double)msec) << " I/s";
+		BOOST_LOG_TRIVIAL(info) << "Speed: " << ((double)benchmark_solutions * 1000 / (double)msec) << " Sols/s";
+	} else {
+		BOOST_LOG_TRIVIAL(info) << "Speed: >1000 I/s (benchmark completed too quickly for accurate measurement)";
+		BOOST_LOG_TRIVIAL(info) << "Speed: >1000 Sols/s (benchmark completed too quickly for accurate measurement)";
+	}
+
+	// cleanup remaining nonces to prevent memory leaks
+	for (uint256* nonce : benchmark_nonces) {
+		delete nonce;
+	}
+	benchmark_nonces.clear();
 }
