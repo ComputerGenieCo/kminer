@@ -66,7 +66,7 @@ void MinerFactory::ClearAllSolvers() {
 	_solvers.clear();
 }
 
-ISolver * MinerFactory::GenCPUSolver(int use_opt) {
+ISolver * MinerFactory::GenCPUSolver([[maybe_unused]] int use_opt) {
     // TODO fix dynamic linking on Linux
 #ifdef    USE_CPU_XENONCAT
 	_solvers.push_back(new CPUSolverXenoncat(use_opt));
@@ -75,13 +75,13 @@ ISolver * MinerFactory::GenCPUSolver(int use_opt) {
 }
 
 #ifdef USE_CPU_XENONCAT
-ISolver * MinerFactory::GenCPUSolverXenoncat(int use_opt) {
+ISolver * MinerFactory::GenCPUSolverXenoncat([[maybe_unused]] int use_opt) {
     _solvers.push_back(new CPUSolverXenoncat(use_opt));
     return _solvers.back();
 }
 #endif
 
-ISolver * MinerFactory::GenCUDASolver(int dev_id, int blocks, int threadsperblock) {
+ISolver * MinerFactory::GenCUDASolver([[maybe_unused]] int dev_id, [[maybe_unused]] int blocks, [[maybe_unused]] int threadsperblock) {
 #ifdef USE_CUDA_DJEZO
 	_solvers.push_back(new CUDASolverDjezo(dev_id, blocks, threadsperblock));
 	return _solvers.back();

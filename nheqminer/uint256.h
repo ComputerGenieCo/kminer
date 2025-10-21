@@ -31,7 +31,7 @@ class base_blob
 {
 protected:
     enum { WIDTH=BITS/8 };
-    uint8_t _ALIGN(4) data[WIDTH];
+    alignas(4) uint8_t data[WIDTH];
 public:
     base_blob()
     {
@@ -95,11 +95,12 @@ public:
     template<typename Stream>
     void Serialize(Stream& s, int nType, int nVersion) const
     {
+        (void)nType; (void)nVersion;
         s.write((char*)data, sizeof(data));
     }
 
     template<typename Stream>
-    void Unserialize(Stream& s, int nType, int nVersion)
+    void Unserialize(Stream& s, [[maybe_unused]] int nType, [[maybe_unused]] int nVersion)
     {
         s.read((char*)data, sizeof(data));
     }

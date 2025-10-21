@@ -13,11 +13,11 @@ see LICENSE file for a full copy of the GNU General Public License
 
 #include "utilstrencodings.h"
 
-#include "json/json_spirit_reader_template.h"
-#include "json/json_spirit_utils.h"
+#include <nlohmann/json.hpp>
+
 
 using boost::asio::ip::tcp;
-using namespace json_spirit;
+using nlohmann::json;
 
 #include <boost/log/trivial.hpp>
 
@@ -104,20 +104,19 @@ void StratumClient<Miner, Job, Solution>::workLoop()
 			BOOST_LOG_CUSTOM(trace) << "Received: " << response;
 
             if (!response.empty() && response.front() == '{' && response.back() == '}') {
-                Value valResponse;
-                if (read_string(response, valResponse) && valResponse.type() == obj_type) {
-                    const Object& responseObject = valResponse.get_obj();
-                    if (!responseObject.empty()) {
-                        processReponse(responseObject);
+                try {
+                    json valResponse = json::parse(response);
+                    if (valResponse.is_object() && !valResponse.empty()) {
+                        processReponse(valResponse);
                         m_response = response;
                     } else {
-                        //LogS("[WARN] Response was empty\n");
+                        // empty object
                     }
-                } else {
-                    //LogS("[WARN] Parse response failed\n");
+                } catch (const std::exception&) {
+                    // parse failed
                 }
             } else {
-                //LogS("[WARN] Discarding incomplete response\n");
+                // Discarding incomplete response
             }
         } catch (std::exception const& _e) {
 			BOOST_LOG_CUSTOM(warning) << _e.what();
@@ -224,14 +223,13 @@ void StratumClient<Miner, Job, Solution>::disconnect()
 }
 
 template <typename Miner, typename Job, typename Solution>
-void StratumClient<Miner, Job, Solution>::processReponse(const Object& responseObject)
+void StratumClient<Miner, Job, Solution>::processReponse(const json& responseObject)
 {
-    const Value& valError = find_value(responseObject, "error");
-    if (valError.type() == array_type) {
-        const Array& error = valError.get_array();
+    if (responseObject.contains("error") && responseObject["error"].is_array()) {
+        const json& error = responseObject["error"];
         string msg;
-        if (error.size() > 0 && error[1].type() == str_type) {
-            msg = error[1].get_str();
+        if (error.size() > 1 && error[1].is_string()) {
+            msg = error[1].get<std::string>();
         } else {
             msg = "Unknown error";
         }
@@ -239,27 +237,23 @@ void StratumClient<Miner, Job, Solution>::processReponse(const Object& responseO
     }
     std::ostream os(&m_requestBuffer);
 	std::stringstream ss;
-    const Value& valId = find_value(responseObject, "id");
     int id = 0;
-    if (valId.type() == int_type) {
-        id = valId.get_int();
+    if (responseObject.contains("id") && responseObject["id"].is_number_integer()) {
+        id = responseObject["id"].get<int>();
     }
-    Value valRes;
     bool accepted = false;
     switch (id) {
 	case 0:
-	{
-		const Value& valMethod = find_value(responseObject, "method");
-		string method = "";
-		if (valMethod.type() == str_type) {
-			method = valMethod.get_str();
-		}
+        {
+            string method = "";
+            if (responseObject.contains("method") && responseObject["method"].is_string()) {
+                method = responseObject["method"].get<std::string>();
+            }
 
 		if (method == "mining.notify") {
-			const Value& valParams = find_value(responseObject, "params");
-			if (valParams.type() == array_type) {
-				const Array& params = valParams.get_array();
-				Job* workOrder = p_miner->parseJob(params);
+                if (responseObject.contains("params") && responseObject["params"].is_array()) {
+                    const json& params = responseObject["params"];
+                    Job* workOrder = p_miner->parseJob(params);
 
 				if (workOrder)
 				{
@@ -292,27 +286,24 @@ void StratumClient<Miner, Job, Solution>::processReponse(const Object& responseO
 			}
 		}
 		else if (method == "mining.set_target") {
-			const Value& valParams = find_value(responseObject, "params");
-			if (valParams.type() == array_type) {
-				const Array& params = valParams.get_array();
-				m_nextJobTarget = params[0].get_str();
+                if (responseObject.contains("params") && responseObject["params"].is_array()) {
+                    const json& params = responseObject["params"];
+                    m_nextJobTarget = params[0].get<std::string>();
 				BOOST_LOG_CUSTOM(info) << CL_MAG "Target set to " << m_nextJobTarget << CL_N;
 			}
 		}
 		else if (method == "mining.set_extranonce") {
-			const Value& valParams = find_value(responseObject, "params");
-			if (valParams.type() == array_type) {
-				const Array& params = valParams.get_array();
-				p_miner->setServerNonce(params[0].get_str());
+                if (responseObject.contains("params") && responseObject["params"].is_array()) {
+                    const json& params = responseObject["params"];
+                    p_miner->setServerNonce(params[0].get<std::string>());
 			}
 		}
 		else if (method == "client.reconnect") {
-			const Value& valParams = find_value(responseObject, "params");
-			if (valParams.type() == array_type) {
-				const Array& params = valParams.get_array();
-				if (params.size() > 1) {
-					p_active->host = params[0].get_str();
-					p_active->port = params[1].get_str();
+                if (responseObject.contains("params") && responseObject["params"].is_array()) {
+                    const json& params = responseObject["params"];
+                    if (params.size() > 1) {
+                        p_active->host = params[0].get<std::string>();
+                        p_active->port = params[1].get<std::string>();
 				}
 				// TODO: Handle wait time
 				BOOST_LOG_CUSTOM(info) << "Reconnection requested";
@@ -322,63 +313,58 @@ void StratumClient<Miner, Job, Solution>::processReponse(const Object& responseO
 		break;
 	}
     case 1:
-        valRes = find_value(responseObject, "result");
-        if (valRes.type() == array_type) {
-			BOOST_LOG_CUSTOM(info) << "Subscribed to stratum server";
-			const Array& result = valRes.get_array();
+        if (responseObject.contains("result") && responseObject["result"].is_array()) {
+            const json& result = responseObject["result"];
+            BOOST_LOG_CUSTOM(info) << "Subscribed to stratum server";
             // Ignore session ID for now.
-            p_miner->setServerNonce(result[1].get_str());
-			ss << "{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\""
-			   << p_active->user << "\",\"" << p_active->pass << "\"]}\n";
-			std::string sss = ss.str();
-			os << sss;
-			BOOST_LOG_CUSTOM(trace) << "Sending: " << sss;
+            p_miner->setServerNonce(result[1].get<std::string>());
+            ss << "{\"id\":2,\"method\":\"mining.authorize\",\"params\":[\""
+               << p_active->user << "\",\"" << p_active->pass << "\"]}\n";
+            std::string sss = ss.str();
+            os << sss;
+            BOOST_LOG_CUSTOM(trace) << "Sending: " << sss;
             write(m_socket, m_requestBuffer);
         }
         break;
-	case 2:
-	{
-		valRes = find_value(responseObject, "result");
-		m_authorized = false;
-		if (valRes.type() == bool_type) {
-			m_authorized = valRes.get_bool();
-		}
-		if (!m_authorized) {
-			BOOST_LOG_CUSTOM(error) << "Worker not authorized: " << p_active->user;
-			disconnect();
-			return;
-		}
-		BOOST_LOG_CUSTOM(info) << "Authorized worker " << p_active->user;
+    case 2:
+    {
+        m_authorized = false;
+        if (responseObject.contains("result") && responseObject["result"].is_boolean()) {
+            m_authorized = responseObject["result"].get<bool>();
+        }
+        if (!m_authorized) {
+            BOOST_LOG_CUSTOM(error) << "Worker not authorized: " << p_active->user;
+            disconnect();
+            return;
+        }
+        BOOST_LOG_CUSTOM(info) << "Authorized worker " << p_active->user;
 
-		ss << "{\"id\":3,\"method\":\"mining.extranonce.subscribe\",\"params\":[]}\n";
-		std::string sss = ss.str();
-		os << sss;
-		BOOST_LOG_CUSTOM(trace) << "Sending: " << sss;
-		write(m_socket, m_requestBuffer);
+        ss << "{\"id\":3,\"method\":\"mining.extranonce.subscribe\",\"params\":[]}\n";
+        std::string sss = ss.str();
+        os << sss;
+        BOOST_LOG_CUSTOM(trace) << "Sending: " << sss;
+        write(m_socket, m_requestBuffer);
 
-		break;
-	}
+        break;
+    }
     case 3:
         // nothing to do...
         break;
     default:
-        valRes = find_value(responseObject, "result");
-        if (valRes.type() == bool_type) {
-            accepted = valRes.get_bool();
+        if (responseObject.contains("result") && responseObject["result"].is_boolean()) {
+            accepted = responseObject["result"].get<bool>();
         }
         if (accepted) {
-			BOOST_LOG_CUSTOM(info) << CL_GRN "Accepted share #" << id << CL_N;
+            BOOST_LOG_CUSTOM(info) << CL_GRN "Accepted share #" << id << CL_N;
             p_miner->acceptedSolution(m_stale);
         } else {
-			valRes = find_value(responseObject, "error");
-			std::string reason = "unknown";
-			if (valRes.type() == array_type)
-			{
-				const Array& params = valRes.get_array();
-				if (params.size() > 1 && params[1].type() == str_type)
-					reason = params[1].get_str();
-			}
-			BOOST_LOG_CUSTOM(warning) << CL_RED "Rejected share #" << id << CL_N " (" << reason << ")";
+            std::string reason = "unknown";
+            if (responseObject.contains("error") && responseObject["error"].is_array()) {
+                const json& params = responseObject["error"];
+                if (params.size() > 1 && params[1].is_string())
+                    reason = params[1].get<std::string>();
+            }
+            BOOST_LOG_CUSTOM(warning) << CL_RED "Rejected share #" << id << CL_N " (" << reason << ")";
             p_miner->rejectedSolution(m_stale);
         }
         break;

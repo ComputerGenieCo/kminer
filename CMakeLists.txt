@@ -73,15 +73,21 @@ endif ()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/../)
 
+# Fetch nlohmann::json (header-only modern JSON library)
+include(FetchContent)
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.11.2
+)
+FetchContent_MakeAvailable(nlohmann_json)
+
 set(SOURCE_FILES
     # sources
     nheqminer/amount.cpp
     nheqminer/api.cpp
     nheqminer/arith_uint256.cpp
     nheqminer/crypto/sha256.cpp
-    nheqminer/json/json_spirit_reader.cpp
-    nheqminer/json/json_spirit_value.cpp
-    nheqminer/json/json_spirit_writer.cpp
     nheqminer/libstratum/ZcashStratum.cpp
     nheqminer/main.cpp
     nheqminer/primitives/block.cpp
@@ -94,15 +100,7 @@ set(SOURCE_FILES
     nheqminer/arith_uint256.h
     nheqminer/crypto/sha256.h
     nheqminer/hash.h
-    nheqminer/json/json_spirit.h
-    nheqminer/json/json_spirit_error_position.h
-    nheqminer/json/json_spirit_reader.h
-    nheqminer/json/json_spirit_reader_template.h
-    nheqminer/json/json_spirit_stream_reader.h
-    nheqminer/json/json_spirit_utils.h
-    nheqminer/json/json_spirit_value.h
-    nheqminer/json/json_spirit_writer.h
-    nheqminer/json/json_spirit_writer_template.h
+    # nlohmann::json (header-only) is provided by FetchContent; headers are included directly.
     nheqminer/libstratum/StratumClient.cpp
     nheqminer/libstratum/StratumClient.h
     nheqminer/libstratum/ZcashStratum.cpp

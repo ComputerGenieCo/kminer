@@ -68,8 +68,9 @@ MinerFactory *_MinerFactory = nullptr;
 // stratum client sig
 static ZcashStratumClient* scSig = nullptr;
 
-extern "C" void stratum_sigint_handler(int signum) 
+extern "C" void stratum_sigint_handler(int /*signum*/) 
 { 
+	// signum intentionally unused
 	if (scSig) scSig->disconnect();
 	if (_MinerFactory) _MinerFactory->ClearAllSolvers();
 }
@@ -185,7 +186,7 @@ void detect_AVX_and_AVX2()
 
 void start_mining(int api_port, const std::string& host, const std::string& port,
 	const std::string& user, const std::string& password,
-	ZcashStratumClient* handler, const std::vector<ISolver *> &i_solvers)
+	ZcashStratumClient*& handler, const std::vector<ISolver *> &i_solvers)
 {
 	std::shared_ptr<boost::asio::io_service> io_service(new boost::asio::io_service);
 
@@ -218,13 +219,9 @@ void start_mining(int api_port, const std::string& host, const std::string& port
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		if (++c % 1000 == 0)
 		{
-			double allshares = speed.GetShareSpeed() * 60;
-			double accepted = speed.GetShareOKSpeed() * 60;
 			BOOST_LOG_TRIVIAL(info) << CL_YLW "Speed [" << INTERVAL_SECONDS << " sec]: " <<
 				speed.GetHashSpeed() << " I/s, " <<
 				speed.GetSolutionSpeed() << " Sols/s" <<
-				//accepted << " AS/min, " << 
-				//(allshares - accepted) << " RS/min" 
 				CL_N;
 		}
 		if (api) while (api->poll()) {}
@@ -507,6 +504,9 @@ int opencl_t = 0;	for (int i = 1; i < argc; ++i)
 	{
 		BOOST_LOG_TRIVIAL(error) << er.what();
 	}
+
+	// suppress unused variable warning when OpenCL options are not enabled
+	(void)opencl_t;
 
 	boost::log::core::get()->remove_all_sinks();
 

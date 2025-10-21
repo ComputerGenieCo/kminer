@@ -33,7 +33,7 @@ typedef uint32_t eh_index;
 #define BOOST_LOG_CUSTOM(sev, pos) BOOST_LOG_TRIVIAL(sev) << "miner#" << pos << " | "
 
 
-void CompressArray(const unsigned char* in, size_t in_len,
+void CompressArray(const unsigned char* in, [[maybe_unused]] size_t in_len,
 	unsigned char* out, size_t out_len,
 	size_t bit_len, size_t byte_pad)
 {
@@ -89,7 +89,7 @@ std::vector<unsigned char> GetMinimalFromIndices(std::vector<eh_index> indices,
 	size_t minLen{ (cBitLen + 1)*lenIndices / (8 * sizeof(eh_index)) };
 	size_t bytePad{ sizeof(eh_index) - ((cBitLen + 1) + 7) / 8 };
 	std::vector<unsigned char> array(lenIndices);
-	for (int i = 0; i < indices.size(); i++) {
+	for (size_t i = 0; i < indices.size(); i++) {
 		EhIndexToArray(indices[i], array.data() + (i*sizeof(eh_index)));
 	}
 	std::vector<unsigned char> ret(minLen);
@@ -99,7 +99,7 @@ std::vector<unsigned char> GetMinimalFromIndices(std::vector<eh_index> indices,
 }
 
 
-void static ZcashMinerThread(ZcashMiner* miner, int size, int pos, ISolver *solver)
+void static ZcashMinerThread(ZcashMiner* miner, [[maybe_unused]] int size, int pos, ISolver *solver)
 {
 	BOOST_LOG_CUSTOM(info, pos) << "Starting thread #" << pos << " (" << solver->getname() << ") " << solver->getdevinfo();
 
@@ -375,7 +375,7 @@ void ZcashMiner::start()
 	// #1 start cpu threads
 	// #2 start CUDA threads
 	// #3 start OPENCL threads
-	for (int i = 0; i < solvers.size(); ++i) {
+	for (size_t i = 0; i < solvers.size(); ++i) {
 		minerThreadActive[i] = true;
 		minerThreads[i] = std::thread(boost::bind(&ZcashMinerThread, this, nThreads, i, solvers[i]));
 		if (solvers[i]->GetType() == SolverType::CPU) {
@@ -479,32 +479,32 @@ void ZcashMiner::setServerNonce(const std::string& n1str)
 }
 
 
-ZcashJob* ZcashMiner::parseJob(const Array& params)
+ZcashJob* ZcashMiner::parseJob(const nlohmann::json& params)
 {
     if (params.size() < 2) {
         throw std::logic_error("Invalid job params");
     }
 
     ZcashJob* ret = new ZcashJob();
-    ret->job = params[0].get_str();
+	ret->job = params[0].get<std::string>();
 
     int32_t version;
-    sscanf(params[1].get_str().c_str(), "%x", &version);
+	sscanf(params[1].get<std::string>().c_str(), "%x", &version);
     // TODO: On a LE host shouldn't this be le32toh?
     ret->header.nVersion = be32toh(version);
 
     if (ret->header.nVersion == 4) {
-        if (params.size() < 8) {
+		if (params.size() < 8) {
             throw std::logic_error("Invalid job params");
         }
 
         std::stringstream ssHeader;
-        ssHeader << params[1].get_str()
-                 << params[2].get_str()
-                 << params[3].get_str()
-                 << params[4].get_str()
-                 << params[5].get_str()
-                 << params[6].get_str()
+	ssHeader << params[1].get<std::string>()
+		 << params[2].get<std::string>()
+		 << params[3].get<std::string>()
+		 << params[4].get<std::string>()
+		 << params[5].get<std::string>()
+		 << params[6].get<std::string>()
                     // Empty nonce
                  << "0000000000000000000000000000000000000000000000000000000000000000"
                  << "00"; // Empty solution
@@ -517,8 +517,8 @@ ZcashJob* ZcashMiner::parseJob(const Array& params)
             throw std::logic_error("ZcashMiner::parseJob(): Invalid block header parameters");
         }
 
-        ret->time = params[5].get_str();
-        ret->clean = params[7].get_bool();
+	ret->time = params[5].get<std::string>();
+	ret->clean = params[7].get<bool>();
     } else {
         throw std::logic_error("ZcashMiner::parseJob(): Invalid or unsupported block header version");
     }
@@ -552,13 +552,13 @@ void ZcashMiner::submitSolution(const EquihashSolution& solution, const std::str
 }
 
 
-void ZcashMiner::acceptedSolution(bool stale)
+void ZcashMiner::acceptedSolution([[maybe_unused]] bool stale)
 {
 	speed.AddShareOK();
 }
 
 
-void ZcashMiner::rejectedSolution(bool stale)
+void ZcashMiner::rejectedSolution([[maybe_unused]] bool stale)
 {
 }
 
@@ -704,7 +704,7 @@ void Solvers_doBenchmark(int hashes, const std::vector<ISolver *> &solvers) {
 
 	benchmark_work.lock();
 	// bind benchmark threads
-	for (int i = 0; i < solvers.size(); ++i) {
+	for (size_t i = 0; i < solvers.size(); ++i) {
 		bthreads[i] = std::thread(boost::bind(&benchmark_thread, i, solvers[i]));
     }
 #ifdef WIN32

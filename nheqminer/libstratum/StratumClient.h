@@ -17,12 +17,14 @@ see LICENSE file for a full copy of the GNU General Public License
 #include <thread>
 #include <atomic>
 
-#include "json/json_spirit_value.h"
+// Use nlohmann::json directly (modern JSON implementation). The legacy
+// json_spirit shim has been removed; migrate call-sites to direct usage.
+#include <nlohmann/json.hpp>
 
 using namespace std;
 using namespace boost::asio;
 using boost::asio::ip::tcp;
-using namespace json_spirit;
+using nlohmann::json;
 
 #ifndef _MSC_VER
 #define CONSOLE_COLORS
@@ -124,7 +126,7 @@ private:
 
     void work_timeout_handler(const boost::system::error_code& ec);
 
-    void processReponse(const Object& responseObject);
+    void processReponse(const nlohmann::json& responseObject);
 
     cred_t * p_active;
     cred_t m_primary;

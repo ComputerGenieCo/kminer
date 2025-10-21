@@ -17,11 +17,11 @@ see LICENSE file for a full copy of the GNU General Public License
 #include <thread>
 #include <mutex>
 
-#include "json/json_spirit_value.h"
+#include <nlohmann/json.hpp>
 
 #include "ISolver.h"
 
-using namespace json_spirit;
+using nlohmann::json;
 
 extern int use_avx;
 extern int use_avx2;
@@ -105,7 +105,7 @@ public:
     void stop();
 	bool isMining() { return m_isActive; }
 	void setServerNonce(const std::string& n1str);
-    ZcashJob* parseJob(const Array& params);
+    ZcashJob* parseJob(const nlohmann::json& params);
     void setJob(ZcashJob* job);
 	void onSolutionFound(const std::function<bool(const EquihashSolution&, const std::string&)> callback);
 	void submitSolution(const EquihashSolution& solution, const std::string& jobid);
