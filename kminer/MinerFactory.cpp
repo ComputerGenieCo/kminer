@@ -10,6 +10,7 @@ see LICENSE file for a full copy of the GNU General Public License
 #include "MinerFactory.h"
 
 #include <thread>
+#include <boost/log/trivial.hpp>
 
 extern int use_avx;
 extern int use_avx2;
@@ -25,7 +26,10 @@ std::vector<ISolver *> MinerFactory::GenerateSolvers(int cpu_threads, int cuda_c
 	std::vector<ISolver *> solversPointers;
 
 	for (int i = 0; i < cuda_count; ++i) {
-		solversPointers.push_back(GenCUDASolver(cuda_en[i], cuda_b[i], cuda_t[i]));
+		ISolver* solver = GenCUDASolver(cuda_en[i], cuda_b[i], cuda_t[i]);
+		if (solver != nullptr) {
+			solversPointers.push_back(solver);
+		}
 	}
 
 	bool hasGpus = solversPointers.size() > 0;
@@ -73,6 +77,12 @@ ISolver * MinerFactory::GenCPUSolverXenoncat([[maybe_unused]] int use_opt) {
 
 ISolver * MinerFactory::GenCUDASolver([[maybe_unused]] int dev_id, [[maybe_unused]] int blocks, [[maybe_unused]] int threadsperblock) {
 #ifdef USE_CUDA_DJEZO
+	// Validate device ID before creating solver
+	int device_count = cuda_djezo::getcount();
+	if (dev_id >= device_count) {
+		BOOST_LOG_TRIVIAL(error) << "CUDA device " << dev_id << " not found. Available devices: 0-" << (device_count - 1);
+		return nullptr;
+	}
 	_solvers.push_back(new CUDASolverDjezo(dev_id, blocks, threadsperblock));
 	return _solvers.back();
 #endif

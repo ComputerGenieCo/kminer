@@ -654,17 +654,20 @@ int benchmark_thread(int tid, ISolver *solver)
 	return 0;
 }
 
-void Solvers_doBenchmark(int hashes, const std::vector<ISolver *> &solvers) {
+void Solvers_doBenchmark(int hashes, const std::vector<ISolver *> &solvers, bool custom_hash_count) {
 	// Check if there are any CUDA solvers and increase hashes for accurate measurement
-	bool has_cuda = false;
-	for (ISolver* solver : solvers) {
-		if (solver->GetType() == SolverType::CUDA) {
-			has_cuda = true;
-			break;
+	// Only apply multiplier if user didn't specify a custom hash count
+	if (!custom_hash_count) {
+		bool has_cuda = false;
+		for (ISolver* solver : solvers) {
+			if (solver->GetType() == SolverType::CUDA) {
+				has_cuda = true;
+				break;
+			}
 		}
-	}
-	if (has_cuda) {
-		hashes *= 10; // Increase iterations for GPUs to ensure accurate measurement
+		if (has_cuda) {
+			hashes *= 10; // Increase iterations for GPUs to ensure accurate measurement
+		}
 	}
 
 	// clear any previous benchmark data

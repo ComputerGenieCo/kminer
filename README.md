@@ -15,6 +15,7 @@ This project supports 2 different solvers:
 ## Quick Start
 
 ### Prerequisites
+- **Linux Only**: This project is developed and tested exclusively on Linux. There are no plans to support Windows or macOS.
 - Ubuntu/Debian-based Linux distribution
 - GCC 13.3 (for CUDA compatibility, see notes below)
 - CMake 3.22+
@@ -88,6 +89,10 @@ For CUDA solvers, you need:
 - CUDA Toolkit 11+
 - NVIDIA drivers
 
+**Supported GPU Architectures**:
+- The CUDA miner is configured by default for NVIDIA GPUs with `sm_60` and `sm_61` architectures (e.g., GTX 10-series).
+- While we only officially support these architectures, you can manually edit `cuda_djezo/CMakeLists.txt` to add support for other architectures if needed.
+
 Install CUDA:
 ```bash
 sudo apt install nvidia-cuda-toolkit
@@ -104,6 +109,7 @@ Parameters:
   -a [port]    Local API port (default: 0 = do not bind)
   -d [level]    Debug print level (0 = print all, 5 = fatal only, default: 2)
   -b [hashes]    Run in benchmark mode (default: 200 iterations)
+                 NOTE: The -b parameter must come before device options (-cd)
 
 CPU settings
   -t [num_thrds]    Number of CPU threads
@@ -120,7 +126,17 @@ NVIDIA CUDA settings
 
 #### Benchmark (test all enabled solvers)
 ```bash
+# Basic benchmark with default 200 iterations
 ./kminer -b
+
+# Benchmark with custom number of hashes (e.g., 5000)
+./kminer -b 5000
+
+# Benchmark specific GPU devices (NOTE: -b parameter must come before -cd)
+./kminer -b 5000 -cd 0 -cd 1
+
+# INCORRECT: Do NOT put hash count at the end
+# ./kminer -b -cd 0 -cd 1 5000  # This will treat 5000 as a device ID!
 ```
 
 #### Mine with CPU (4 threads)
@@ -144,6 +160,18 @@ NVIDIA CUDA settings
 ```
 
 ## Troubleshooting
+
+### Benchmarking Issues
+
+**"CUDA error 'invalid device ordinal'"**: This typically occurs when you specify a GPU device that doesn't exist.
+- Use `./kminer -ci` to list available CUDA devices
+- Ensure you're using the correct command syntax: `./kminer -b 5000 -cd 0 -cd 1`
+- **NOT**: `./kminer -b -cd 0 -cd 1 5000` (this treats 5000 as a device ID)
+
+**Missing GPU in benchmark**: If your GPU isn't being used in benchmark mode:
+- Verify CUDA device detection with `./kminer -ci`
+- Check that CUDA_DJEZO is enabled in your build
+- Ensure valid device IDs (usually 0, 1, 2, etc.)
 
 ### CUDA Build Issues
 

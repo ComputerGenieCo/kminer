@@ -224,6 +224,7 @@ int main(int argc, char* argv[])
 	bool benchmark = false;
 	int log_level = 2;
 	int num_hashes = 200;
+	bool custom_hash_count = false;
 	int api_port = 0;
 int cuda_device_count = 0;
 int cuda_bc = 0;
@@ -350,8 +351,10 @@ int force_cpu_ext = -1;
 			return 0;
 		case 'b':
 			benchmark = true;
-			if (i + 1 < argc && argv[i + 1] && argv[i + 1][0] != '-')
+			if (i + 1 < argc && argv[i + 1] && argv[i + 1][0] != '-') {
 				num_hashes = atoi(argv[++i]);
+				custom_hash_count = true;
+			}
 			break;
 		case 'd':
 			if (i + 1 >= argc) { invalid_arg = argv[i]; break; }
@@ -452,7 +455,7 @@ int force_cpu_ext = -1;
 		else
 		{
 			// For benchmark mode, num_threads already defaults to -1 (auto-detect)
-			Solvers_doBenchmark(num_hashes, _MinerFactory->GenerateSolvers(num_threads, cuda_device_count, cuda_enabled, cuda_blocks, cuda_tpb));
+			Solvers_doBenchmark(num_hashes, _MinerFactory->GenerateSolvers(num_threads, cuda_device_count, cuda_enabled, cuda_blocks, cuda_tpb), custom_hash_count);
 		}
 	}
 	catch (std::runtime_error& er)
