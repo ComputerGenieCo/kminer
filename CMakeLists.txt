@@ -10,6 +10,16 @@ option(USE_CUDA_DJEZO "USE CUDA_DJEZO" OFF)
 
 ## Add solvers here
 if (USE_CPU_XENONCAT)
+    # Ensure assemble.sh is executable
+    execute_process(
+        COMMAND chmod +x ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/assemble.sh
+        RESULT_VARIABLE CHMOD_RESULT
+    )
+    if(NOT CHMOD_RESULT EQUAL 0)
+        message(WARNING "Failed to make assemble.sh executable")
+    endif()
+
+    # Custom command to generate assembly object files
     add_custom_command(
         OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.o
                ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.o
@@ -17,7 +27,17 @@ if (USE_CPU_XENONCAT)
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.asm
                 ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.asm
                 ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/assemble.sh
+                ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/fasm
+        COMMENT "Generating CPU_XENONCAT assembly object files"
+        VERBATIM
     )
+
+    # Custom target to ensure assembly files are built
+    add_custom_target(cpu_xenoncat_asm 
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.o
+                ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.o
+    )
+
     add_definitions(-DUSE_CPU_XENONCAT)
     message("-- USE_CPU_XENONCAT DEFINED")
 endif()
@@ -166,6 +186,9 @@ target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} ${LIBS} )
 
 # link libs
 if (USE_CPU_XENONCAT)
+    # Ensure assembly files are built before linking
+    add_dependencies(${PROJECT_NAME} cpu_xenoncat_asm)
+    
     add_library ( xenoncat_avx1 SHARED IMPORTED GLOBAL )
     set_target_properties ( xenoncat_avx1 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.o" )
     add_library ( xenoncat_avx2 SHARED IMPORTED GLOBAL )

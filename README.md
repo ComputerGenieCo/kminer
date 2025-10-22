@@ -32,13 +32,7 @@ sudo apt install build-essential cmake libboost-all-dev fasm
 git clone https://github.com/ComputerGenieCo/kminer.git
 cd kminer
 
-# Generate assembly files for CPU_XENONCAT
-cd cpu_xenoncat/asm_linux
-chmod +x assemble.sh
-./assemble.sh
-cd ../../
-
-# Build
+# Build (assembly files are generated automatically)
 mkdir build && cd build
 cmake ..
 make -j$(nproc)
@@ -52,6 +46,8 @@ make -j$(nproc)
 # Test mining with localhost pool
 ./kminer -l localhost:5332 -u test.worker1 -t 4
 ```
+
+> **Note**: The CPU_XENONCAT solver requires assembly files that are automatically generated during the build process. CMake will automatically run the FASM assembler to create the necessary `equihash_avx1.o` and `equihash_avx2.o` files when building with CPU_XENONCAT enabled.
 
 ### Validation Results
 
@@ -71,6 +67,7 @@ To enable only specific solvers, modify the CMake options:
 cmake .. -DUSE_CPU_XENONCAT=ON -DUSE_CUDA_DJEZO=OFF
 make -j$(nproc)
 ```
+*Assembly files are automatically generated during build*
 
 #### GPU Only (CUDA_DJEZO)
 ```bash
