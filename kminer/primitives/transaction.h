@@ -16,10 +16,10 @@ see LICENSE file for a full copy of the GNU General Public License
 
 #include <boost/array.hpp>
 
-#include "zcash/NoteEncryption.hpp"
-#include "zcash/Zcash.h"
-#include "zcash/JoinSplit.hpp"
-#include "zcash/Proof.hpp"
+#include "../algos/zcash/NoteEncryption.hpp"
+#include "../algos/zcash/Zcash.h"
+#include "../algos/zcash/JoinSplit.hpp"
+#include "../algos/zcash/Proof.hpp"
 
 class JSDescription
 {

@@ -135,10 +135,10 @@ set(SOURCE_FILES
     kminer/uint256.h
     kminer/utilstrencodings.h
     kminer/version.h
-    kminer/zcash/JoinSplit.hpp
-    kminer/zcash/NoteEncryption.hpp
-    kminer/zcash/Proof.hpp
-    kminer/zcash/Zcash.h
+    algos/zcash/JoinSplit.hpp
+    algos/zcash/NoteEncryption.hpp
+    algos/zcash/Proof.hpp
+    algos/zcash/Zcash.h
     kminer/SolverStub.h
     kminer/AvailableSolvers.h
     kminer/ISolver.h
@@ -152,15 +152,15 @@ if (USE_CUDA_DJEZO)
     # make same path on windows
     #blake shared
     # src
-    blake2/blake2bx.cpp
+    algos/blake2/blake2bx.cpp
     # headers
-    blake2/blake2.h
-    blake2/blake2b-load-sse2.h
-    blake2/blake2b-load-sse41.h
-    blake2/blake2b-round.h
-    blake2/blake2-config.h
-    blake2/blake2-impl.h
-    blake2/blake2-round.h
+    algos/blake2/blake2.h
+    algos/blake2/blake2b-load-sse2.h
+    algos/blake2/blake2b-load-sse41.h
+    algos/blake2/blake2b-round.h
+    algos/blake2/blake2-config.h
+    algos/blake2/blake2-impl.h
+    algos/blake2/blake2-round.h
     )
 endif()
 

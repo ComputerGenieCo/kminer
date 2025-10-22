@@ -10,7 +10,7 @@ see LICENSE file for a full copy of the GNU General Public License
 #include "cuda_runtime.h"
 #include "device_launch_parameters.h"
 // #include "device_functions.h"  // Removed - causes issues when included in regular C++ files
-#include "../blake2/blake2.h"
+#include "../../algos/blake2/blake2.h"
 #include "cuda_djezo.hpp"
 
 #include <stdio.h>
