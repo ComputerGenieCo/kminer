@@ -1,0 +1,108 @@
+name: Build and Release kminer
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.build_type }}
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        include:
+          - build_type: cpu
+            cmake_opts: "-DUSE_CPU_XENONCAT=ON -DUSE_CUDA_DJEZO=OFF"
+            artifact_name: kminer-cpu
+          - build_type: gpu
+            cmake_opts: "-DUSE_CPU_XENONCAT=OFF -DUSE_CUDA_DJEZO=ON"
+            artifact_name: kminer-gpu
+          - build_type: cpu-gpu
+            cmake_opts: "-DUSE_CPU_XENONCAT=ON -DUSE_CUDA_DJEZO=ON"
+            artifact_name: kminer-cpu-gpu
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Get short commit hash
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        if: matrix.build_type == 'cpu'
+        run: |
+          git tag ${{ steps.vars.outputs.sha_short }}
+          git push origin ${{ steps.vars.outputs.sha_short }}
+      
+      - name: Install CUDA Toolkit
+        if: matrix.build_type == 'gpu' || matrix.build_type == 'cpu-gpu'
+        uses: Jimver/cuda-toolkit@v0.2.28
+        with:
+          cuda: '12.5.1'
+          method: 'network'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fasm libboost-all-dev nlohmann-json3-dev
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cd build
+          cmake .. ${{ matrix.cmake_opts }}
+
+      - name: Compile
+        run: |
+          cd build
+          make -j$(nproc)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: build/kminer
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # Fetch all history for all tags
+
+      - name: Get short commit hash
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: ls -R artifacts
+
+      - name: Rename binaries
+        run: |
+          mv artifacts/kminer-cpu/kminer kminer-cpu
+          mv artifacts/kminer-gpu/kminer kminer-gpu
+          mv artifacts/kminer-cpu-gpu/kminer kminer-cpu-gpu
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.sha_short }}
+          files: |
+            kminer-cpu
+            kminer-gpu
+            kminer-cpu-gpu
