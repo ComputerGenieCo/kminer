@@ -71,8 +71,7 @@ static ZcashStratumClient* scSig = nullptr;
 extern "C" void stratum_sigint_handler(int /*signum*/) 
 { 
 	// signum intentionally unused
-	if (scSig) scSig->disconnect();
-	if (_MinerFactory) _MinerFactory->ClearAllSolvers();
+	exit(0);
 }
 
 void print_help()
@@ -211,8 +210,6 @@ void start_mining(int api_port, const std::string& host, const std::string& port
 	});
 
 	handler = &sc;
-	scSig = &sc;
-	signal(SIGINT, stratum_sigint_handler);
 
 	int c = 0;
 	while (sc.isRunning()) {
@@ -243,6 +240,8 @@ int main(int argc, char* argv[])
 	std::cout << "\t==================== www.nicehash.com ====================" << std::endl;
 	std::cout << std::endl;
 
+	signal(SIGINT, stratum_sigint_handler);
+
 	std::string location = "localhost:5332";
 	std::string user = "RCGxKMDxZcBGRZkxvgCRAXGpiQFt8wU7Wq";
 	std::string password = "x";
@@ -257,7 +256,8 @@ int cuda_tbpc = 0;
 int opencl_platform = 0;
 int opencl_device_count = 0;
 int force_cpu_ext = -1;
-int opencl_t = 0;	for (int i = 1; i < argc; ++i)
+int opencl_t = 0;
+	std::string invalid_arg;	for (int i = 1; i < argc; ++i)
 	{
 		if (argv[i][0] != '-') continue;
 
@@ -405,15 +405,19 @@ int opencl_t = 0;	for (int i = 1; i < argc; ++i)
 		//	break;
 		//}
 		case 'l':
+			if (i + 1 >= argc) { invalid_arg = argv[i]; break; }
 			location = argv[++i];
 			break;
 		case 'u':
+			if (i + 1 >= argc) { invalid_arg = argv[i]; break; }
 			user = argv[++i];
 			break;
 		case 'p':
+			if (i + 1 >= argc) { invalid_arg = argv[i]; break; }
 			password = argv[++i];
 			break;
 		case 't':
+			if (i + 1 >= argc) { invalid_arg = argv[i]; break; }
 			num_threads = atoi(argv[++i]);
 			break;
 		case 'h':
@@ -421,19 +425,31 @@ int opencl_t = 0;	for (int i = 1; i < argc; ++i)
 			return 0;
 		case 'b':
 			benchmark = true;
-			if (argv[i + 1] && argv[i + 1][0] != '-')
+			if (i + 1 < argc && argv[i + 1] && argv[i + 1][0] != '-')
 				num_hashes = atoi(argv[++i]);
 			break;
 		case 'd':
+			if (i + 1 >= argc) { invalid_arg = argv[i]; break; }
 			log_level = atoi(argv[++i]);
 			break;
 		case 'a':
+			if (i + 1 >= argc) { invalid_arg = argv[i]; break; }
 			api_port = atoi(argv[++i]);
 			break;
 		case 'e':
+			if (i + 1 >= argc) { invalid_arg = argv[i]; break; }
 			force_cpu_ext = atoi(argv[++i]);
 			break;
+		default:
+			invalid_arg = argv[i];
+			break;
 		}
+	}
+
+	if (!invalid_arg.empty()) {
+		std::cout << "Invalid option: " << invalid_arg << std::endl;
+		print_help();
+		return 1;
 	}
 
 	if (force_cpu_ext >= 0)
