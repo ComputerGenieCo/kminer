@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
 	std::string location = "localhost:5332";
 	std::string user = "RCGxKMDxZcBGRZkxvgCRAXGpiQFt8wU7Wq";
 	std::string password = "x";
-	int num_threads = 0;
+	int num_threads = -1; // Default to auto-detect (75% of cores)
 	bool benchmark = false;
 	int log_level = 2;
 	int num_hashes = 200;
@@ -417,6 +417,21 @@ int force_cpu_ext = -1;
 	try
 	{
 		_MinerFactory = new MinerFactory(use_avx == 1, true);
+		
+		// Set default CUDA device 0 if no CUDA devices specified but CUDA is enabled
+#ifdef USE_CUDA_DJEZO
+		if (cuda_device_count == 0) {
+			int available_devices = cuda_djezo::getcount();
+			if (available_devices > 0) {
+				cuda_enabled[0] = 0; // Enable device 0
+				cuda_blocks[0] = 0;  // Use default blocks
+				cuda_tpb[0] = 0;     // Use default threads per block
+				cuda_device_count = 1;
+				BOOST_LOG_TRIVIAL(info) << "No CUDA devices specified, defaulting to device 0";
+			}
+		}
+#endif
+		
 		if (!benchmark)
 		{
 			if (user.length() == 0)
@@ -436,9 +451,8 @@ int force_cpu_ext = -1;
 		}
 		else
 		{
-			// For benchmark mode, if no threads specified, use automatic detection (-1)
-			int bench_threads = (num_threads == 0) ? -1 : num_threads;
-			Solvers_doBenchmark(num_hashes, _MinerFactory->GenerateSolvers(bench_threads, cuda_device_count, cuda_enabled, cuda_blocks, cuda_tpb));
+			// For benchmark mode, num_threads already defaults to -1 (auto-detect)
+			Solvers_doBenchmark(num_hashes, _MinerFactory->GenerateSolvers(num_threads, cuda_device_count, cuda_enabled, cuda_blocks, cuda_tpb));
 		}
 	}
 	catch (std::runtime_error& er)
