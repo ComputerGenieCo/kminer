@@ -1,6 +1,6 @@
-# nheqminer - Equihash CPU & GPU Miner
+# kminer - Equihash CPU & GPU Miner
 
-A high-performance Equihash miner supporting multiple CPU and GPU solvers.
+A high-performance Equihash miner supporting efficient CPU and GPU solvers. This is a fork of the abandoned nheqminer project, optimized to include only the faster CPU_XENONCAT and CUDA_DJEZO solvers while removing slower alternatives.
 
 ## Solver Options
 
@@ -16,9 +16,9 @@ This project supports 2 different solvers:
 
 ### Prerequisites
 - Ubuntu/Debian-based Linux distribution
-- GCC 7-11 (for CUDA compatibility, see notes below)
-- CMake 3.16+
-- Boost 1.70+
+- GCC 16 (for CUDA compatibility, see notes below)
+- CMake 3.22+
+- Boost 1.74
 - FASM assembler (for CPU_XENONCAT)
 
 ### Install Dependencies
@@ -29,8 +29,8 @@ sudo apt install build-essential cmake libboost-all-dev fasm
 
 ### Clone and Build (Default: CPU_XENONCAT)
 ```bash
-git clone https://github.com/nicehash/nheqminer.git
-cd nheqminer
+git clone https://github.com/ComputerGenieCo/kminer.git
+cd kminer
 
 # Generate assembly files for CPU_XENONCAT
 cd cpu_xenoncat/asm_linux
@@ -47,10 +47,10 @@ make -j$(nproc)
 ### Test the Build
 ```bash
 # Run benchmark to verify solvers work
-./nheqminer -b
+./kminer -b
 
 # Test mining with localhost pool
-./nheqminer -l localhost:5332 -u test.worker1 -t 4
+./kminer -l localhost:5332 -u test.worker1 -t 4
 ```
 
 ### Validation Results
@@ -58,7 +58,7 @@ make -j$(nproc)
 **CUDA Compatibility Notes**:
 - CUDA 12.6 supports GCC 7-13.x and resolves GCC 13.3.0 compatibility issues
 - If using Ubuntu's nvidia-cuda-toolkit package, you may need to install proper CUDA 12.6 toolkit and update PATH
-- Test with `./nheqminer -ci` to verify CUDA device detection
+- Test with `./kminer -ci` to verify CUDA device detection
 
 ## Custom Build Options
 
@@ -123,27 +123,27 @@ NVIDIA CUDA settings
 
 #### Benchmark (test all enabled solvers)
 ```bash
-./nheqminer -b
+./kminer -b
 ```
 
 #### Mine with CPU (4 threads)
 ```bash
-./nheqminer -l localhost:5332 -u test.worker1 -t 4
+./kminer -l localhost:5332 -u test.worker1 -t 4
 ```
 
 #### Mine with CPU (8 threads, AVX2 forced)
 ```bash
-./nheqminer -l localhost:5332 -u test.worker1 -t 8 -e 2
+./kminer -l localhost:5332 -u test.worker1 -t 8 -e 2
 ```
 
 #### Mine with GPU (CUDA device 0)
 ```bash
-./nheqminer -l localhost:5332 -u test.worker1 -cd 0
+./kminer -l localhost:5332 -u test.worker1 -cd 0
 ```
 
 #### Mine with CPU + GPU
 ```bash
-./nheqminer -l localhost:5332 -u test.worker1 -t 4 -cd 0
+./kminer -l localhost:5332 -u test.worker1 -t 4 -cd 0
 ```
 
 ## Troubleshooting
@@ -155,15 +155,9 @@ If you encounter CUDA compilation errors:
 1. **GCC/CUDA Version Compatibility**: CUDA 12.6 supports GCC 7-13.x
 2. **CUDA Toolkit Installation**: Ensure you have a proper CUDA 12.6 installation, not just Ubuntu's nvidia-cuda-toolkit package
 3. **PATH Configuration**: Update your PATH to prioritize CUDA 12.6: `export PATH=/usr/local/cuda-12.6/bin:$PATH`
-4. **Device Detection**: Use `./nheqminer -ci` to verify CUDA devices are detected
+4. **Device Detection**: Use `./kminer -ci` to verify CUDA devices are detected
 5. **Build Fixes Applied**: This version includes fixes for CUDA 12.6 compatibility including:
    - Updated deprecated `__shfl` to `__shfl_sync`
    - Updated deprecated `__any` to `__any_sync`
    - Fixed C++11 function signatures
    - Resolved header inclusion conflicts
-
-### Common Issues
-
-- **"undefined reference" errors**: Ensure all required Boost libraries are installed
-- **CUDA kernel launch failures**: Check GPU memory usage and CUDA driver version
-- **Slow performance**: Use `./nheqminer -b` to benchmark and compare solver performance

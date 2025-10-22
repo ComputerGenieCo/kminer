@@ -1,4 +1,4 @@
-project(nheqminer)
+project(kminer)
 cmake_minimum_required(VERSION 3.16)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -44,7 +44,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
 endif()
 
 # Common
-include_directories(${nheqminer_SOURCE_DIR}/nheqminer)
+include_directories(${kminer_SOURCE_DIR}/kminer)
 
 # BOOST
 #find_package(Threads REQUIRED COMPONENTS)
@@ -87,50 +87,50 @@ FetchContent_MakeAvailable(nlohmann_json)
 
 set(SOURCE_FILES
     # sources
-    nheqminer/amount.cpp
-    nheqminer/api.cpp
-    nheqminer/arith_uint256.cpp
-    nheqminer/crypto/sha256.cpp
-    nheqminer/libstratum/ZcashStratum.cpp
-    nheqminer/main.cpp
-    nheqminer/primitives/block.cpp
-    nheqminer/speed.cpp
-    nheqminer/uint256.cpp
-    nheqminer/utilstrencodings.cpp
+    kminer/amount.cpp
+    kminer/api.cpp
+    kminer/arith_uint256.cpp
+    kminer/crypto/sha256.cpp
+    kminer/libstratum/ZcashStratum.cpp
+    kminer/main.cpp
+    kminer/primitives/block.cpp
+    kminer/speed.cpp
+    kminer/uint256.cpp
+    kminer/utilstrencodings.cpp
     # headers
-    nheqminer/amount.h
-    nheqminer/api.hpp
-    nheqminer/arith_uint256.h
-    nheqminer/crypto/sha256.h
-    nheqminer/hash.h
+    kminer/amount.h
+    kminer/api.hpp
+    kminer/arith_uint256.h
+    kminer/crypto/sha256.h
+    kminer/hash.h
     # nlohmann::json (header-only) is provided by FetchContent; headers are included directly.
-    nheqminer/libstratum/StratumClient.cpp
-    nheqminer/libstratum/StratumClient.h
-    nheqminer/libstratum/ZcashStratum.cpp
-    nheqminer/libstratum/ZcashStratum.h
-    nheqminer/primitives/block.h
-    nheqminer/primitives/transaction.h
-    nheqminer/script/script.h
-    nheqminer/serialize.h
-    nheqminer/speed.hpp
-    nheqminer/streams.h
-    nheqminer/support/allocators/zeroafterfree.h
-    nheqminer/tinyformat.h
-    nheqminer/uint252.h
-    nheqminer/uint256.h
-    nheqminer/utilstrencodings.h
-    nheqminer/version.h
-    nheqminer/zcash/JoinSplit.hpp
-    nheqminer/zcash/NoteEncryption.hpp
-    nheqminer/zcash/Proof.hpp
-    nheqminer/zcash/Zcash.h
-    nheqminer/SolverStub.h # just a stub
+    kminer/libstratum/StratumClient.cpp
+    kminer/libstratum/StratumClient.h
+    kminer/libstratum/ZcashStratum.cpp
+    kminer/libstratum/ZcashStratum.h
+    kminer/primitives/block.h
+    kminer/primitives/transaction.h
+    kminer/script/script.h
+    kminer/serialize.h
+    kminer/speed.hpp
+    kminer/streams.h
+    kminer/support/allocators/zeroafterfree.h
+    kminer/tinyformat.h
+    kminer/uint252.h
+    kminer/uint256.h
+    kminer/utilstrencodings.h
+    kminer/version.h
+    kminer/zcash/JoinSplit.hpp
+    kminer/zcash/NoteEncryption.hpp
+    kminer/zcash/Proof.hpp
+    kminer/zcash/Zcash.h
+    kminer/SolverStub.h # just a stub
 
-    nheqminer/AvailableSolvers.h
-    nheqminer/ISolver.h
-    nheqminer/Solver.h
-    nheqminer/MinerFactory.h
-    nheqminer/MinerFactory.cpp
+    kminer/AvailableSolvers.h
+    kminer/ISolver.h
+    kminer/Solver.h
+    kminer/MinerFactory.h
+    kminer/MinerFactory.cpp
 
     )
 

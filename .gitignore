@@ -418,8 +418,8 @@ intermediate/**
 !inc/**
 build
 
-!nheqminer/libs/**
+!kminer/libs/**
 !trompequihash/pthreads**
-!nheqminer/boost/**
+!kminer/boost/**
 !cpu_xenoncat/asm/**
 cpu_xenoncat/asm/*.obj

@@ -1,5 +1,5 @@
 /*
- * This file is part of nheqminer.
+ * This file is part of kminer.
  *
 Licensed under GPL v3.0
 see LICENSE file for a full copy of the GNU General Public License
