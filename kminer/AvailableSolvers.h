@@ -23,17 +23,6 @@ CREATE_SOLVER_STUB(cpu_xenoncat, "cpu_xenoncat_STUB")
 #else
 CREATE_SOLVER_STUB(cuda_djezo, "cuda_djezo_STUB")
 #endif
-// OpenCL solvers are fropped replace with new OS solvers
-#ifdef USE_OCL_XMP
-#include "../ocl_xpm/ocl_xmp.hpp"
-#else
-CREATE_SOLVER_STUB(ocl_xmp, "ocl_xmp_STUB")
-#endif
-#ifdef USE_OCL_SILENTARMY
-#include "../ocl_silentarmy/ocl_silentarmy.hpp"
-#else
-CREATE_SOLVER_STUB(ocl_silentarmy, "ocl_silentarmy_STUB")
-#endif
 
 //namespace AvailableSolvers
 //{
@@ -60,18 +49,5 @@ public:
 		}
 	}
 	virtual ~CUDASolverDjezo() {}
-};
-// OpenCL solvers
-class OPENCLSolverSilentarmy : public Solver<ocl_silentarmy> {
-public:
-	OPENCLSolverSilentarmy(int platf_id, int dev_id) : Solver<ocl_silentarmy>(new ocl_silentarmy(platf_id, dev_id), SolverType::OPENCL) {
-	}
-	virtual ~OPENCLSolverSilentarmy() {}
-};
-class OPENCLSolverXMP : public Solver<ocl_xmp> {
-public:
-	OPENCLSolverXMP(int platf_id, int dev_id) : Solver<ocl_xmp>(new ocl_xmp(platf_id, dev_id), SolverType::OPENCL) {
-	}
-	virtual ~OPENCLSolverXMP() {}
 };
 

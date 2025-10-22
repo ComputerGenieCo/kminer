@@ -5,9 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ## Enable solvers here
-#### older slower
-option(USE_CUDA_TROMP "USE CUDA_TROMP" OFF)
-#### faster
 option(USE_CPU_XENONCAT "USE CPU_XENONCAT" ON)
 option(USE_CUDA_DJEZO "USE CUDA_DJEZO" OFF)
 
@@ -91,6 +88,7 @@ set(SOURCE_FILES
     kminer/api.cpp
     kminer/arith_uint256.cpp
     kminer/crypto/sha256.cpp
+    kminer/libstratum/StratumClient.cpp
     kminer/libstratum/ZcashStratum.cpp
     kminer/main.cpp
     kminer/primitives/block.cpp
@@ -103,10 +101,7 @@ set(SOURCE_FILES
     kminer/arith_uint256.h
     kminer/crypto/sha256.h
     kminer/hash.h
-    # nlohmann::json (header-only) is provided by FetchContent; headers are included directly.
-    kminer/libstratum/StratumClient.cpp
     kminer/libstratum/StratumClient.h
-    kminer/libstratum/ZcashStratum.cpp
     kminer/libstratum/ZcashStratum.h
     kminer/primitives/block.h
     kminer/primitives/transaction.h
@@ -124,14 +119,12 @@ set(SOURCE_FILES
     kminer/zcash/NoteEncryption.hpp
     kminer/zcash/Proof.hpp
     kminer/zcash/Zcash.h
-    kminer/SolverStub.h # just a stub
-
+    kminer/SolverStub.h
     kminer/AvailableSolvers.h
     kminer/ISolver.h
     kminer/Solver.h
     kminer/MinerFactory.h
     kminer/MinerFactory.cpp
-
     )
 
 if (USE_CUDA_DJEZO)

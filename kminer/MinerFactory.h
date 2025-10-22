@@ -14,14 +14,13 @@ see LICENSE file for a full copy of the GNU General Public License
 class MinerFactory
 {
 public:
-	MinerFactory(bool use_xenoncat, bool use_cuda_djezo, bool use_silentarmy)
-		: _use_xenoncat(use_xenoncat), _use_cuda_djezo(use_cuda_djezo), _use_silentarmy(use_silentarmy) {
+	MinerFactory(bool use_xenoncat, bool use_cuda_djezo)
+		: _use_xenoncat(use_xenoncat), _use_cuda_djezo(use_cuda_djezo) {
 	}
 
 	~MinerFactory();
 
-	std::vector<ISolver *> GenerateSolvers(int cpu_threads, int cuda_count, int* cuda_en, int* cuda_b, int* cuda_t,
-		int opencl_count, int opencl_platf, int* opencl_en, int* opencl_t);
+	std::vector<ISolver *> GenerateSolvers(int cpu_threads, int cuda_count, int* cuda_en, int* cuda_b, int* cuda_t);
 	void ClearAllSolvers();
 
 private:
@@ -29,7 +28,6 @@ private:
 
 	bool _use_xenoncat = true;
 	bool _use_cuda_djezo = true;
-	bool _use_silentarmy = true;
 
 	ISolver * GenCPUSolver(int use_opt);
 #ifdef USE_CPU_XENONCAT

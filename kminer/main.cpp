@@ -16,11 +16,6 @@ see LICENSE file for a full copy of the GNU General Public License
 
 #include "libstratum/StratumClient.h"
 
-#if defined(USE_OCL_XMP) || defined(USE_OCL_SILENTARMY)
-#include "../ocl_device_utils/ocl_device_utils.h"
-#define PRINT_OCL_INFO
-#endif
-
 #include <thread>
 #include <chrono>
 #include <atomic>
@@ -101,16 +96,6 @@ void print_help()
 	std::cout << "Example: -cd 0 2 -cb 12 16 -ct 64 128" << std::endl;
 	std::cout << "         -cd0 -cb12 -ct64" << std::endl;
 	std::cout << std::endl;
-	//std::cout << "OpenCL settings" << std::endl;
-	//std::cout << "\t-oi\t\tOpenCL info" << std::endl;
-	//std::cout << "\t-ov [ver]\tSet OpenCL solver (0 = silentarmy, 1 = xmp)" << std::endl;
-	//std::cout << "\t-op [platf]\tSet OpenCL platform to selecd platform devices (-od)" << std::endl;
-	//std::cout << "\t-od [devices]\tEnable OpenCL mining on spec. devices (specify plafrom number first -op)" << std::endl;
-	//std::cout << "\t-ot [threads]\tSet number of threads per device" << std::endl;
-	////std::cout << "\t-cb [blocks]\tNumber of blocks" << std::endl;
-	////std::cout << "\t-ct [tpb]\tNumber of threads per block" << std::endl;
-	//std::cout << "Example: -op 2 -od 0 2" << std::endl; //-cb 12 16 -ct 64 128" << std::endl;
-	std::cout << std::endl;
 }
 
 
@@ -131,21 +116,11 @@ void print_cuda_info()
 #endif
 }
 
-void print_opencl_info() {
-#ifdef PRINT_OCL_INFO
-	ocl_device_utils::print_opencl_devices();
-#endif
-}
-
 #define MAX_INSTANCES 8 * 2
 
 int cuda_enabled[MAX_INSTANCES] = { 0 };
 int cuda_blocks[MAX_INSTANCES] = { 0 };
 int cuda_tpb[MAX_INSTANCES] = { 0 };
-
-int opencl_enabled[MAX_INSTANCES] = { 0 };
-int opencl_threads[MAX_INSTANCES] = { 0 };
-// todo: opencl local and global worksize
 
 
 void detect_AVX_and_AVX2()
@@ -253,10 +228,7 @@ int main(int argc, char* argv[])
 int cuda_device_count = 0;
 int cuda_bc = 0;
 int cuda_tbpc = 0;
-int opencl_platform = 0;
-int opencl_device_count = 0;
 int force_cpu_ext = -1;
-int opencl_t = 0;
 	std::string invalid_arg;	for (int i = 1; i < argc; ++i)
 	{
 		if (argv[i][0] != '-') continue;
@@ -357,53 +329,6 @@ int opencl_t = 0;
 			}
 			break;
 		}
-		//case 'o':
-		//{
-		//	switch (argv[i][2])
-		//	{
-		//	case 'i':
-		//		print_opencl_info();
-		//		return 0;
-		//	case 'v':
-		//		use_old_xmp = atoi(argv[++i]);
-		//		break;
-		//	case 'p':
-		//		opencl_platform = std::stol(argv[++i]);
-		//		break;
-		//	case 'd':
-		//		while (opencl_device_count < 8 && i + 1 < argc)
-		//		{
-		//			try
-		//			{
-		//				opencl_enabled[opencl_device_count] = std::stol(argv[++i]);
-		//				++opencl_device_count;
-		//			}
-		//			catch (...)
-		//			{
-		//				--i;
-		//				break;
-		//			}
-		//		}
-		//		break;
-		//	case 't':
-		//		while (opencl_t < 8 && i + 1 < argc)
-		//		{
-		//			try
-		//			{
-		//				opencl_threads[opencl_t] = std::stol(argv[++i]);
-		//				++opencl_t;
-		//			}
-		//			catch (...)
-		//			{
-		//				--i;
-		//				break;
-		//			}
-		//		}
-		//		break;
-		//		// TODO extra parameters for OpenCL
-		//	}
-		//	break;
-		//}
 		case 'l':
 			if (i + 1 >= argc) { invalid_arg = argv[i]; break; }
 			location = argv[++i];
@@ -491,7 +416,7 @@ int opencl_t = 0;
 
 	try
 	{
-		_MinerFactory = new MinerFactory(use_avx == 1, true, false);
+		_MinerFactory = new MinerFactory(use_avx == 1, true);
 		if (!benchmark)
 		{
 			if (user.length() == 0)
@@ -507,22 +432,19 @@ int opencl_t = 0;
 			start_mining(api_port, host, port, user, password,
 				scSig,
 				_MinerFactory->GenerateSolvers(num_threads, cuda_device_count, cuda_enabled, cuda_blocks,
-				cuda_tpb, opencl_device_count, opencl_platform, opencl_enabled, opencl_threads));
+				cuda_tpb));
 		}
 		else
 		{
 			// For benchmark mode, if no threads specified, use automatic detection (-1)
 			int bench_threads = (num_threads == 0) ? -1 : num_threads;
-			Solvers_doBenchmark(num_hashes, _MinerFactory->GenerateSolvers(bench_threads, cuda_device_count, cuda_enabled, cuda_blocks, cuda_tpb, opencl_device_count, opencl_platform, opencl_enabled, opencl_threads));
+			Solvers_doBenchmark(num_hashes, _MinerFactory->GenerateSolvers(bench_threads, cuda_device_count, cuda_enabled, cuda_blocks, cuda_tpb));
 		}
 	}
 	catch (std::runtime_error& er)
 	{
 		BOOST_LOG_TRIVIAL(error) << er.what();
 	}
-
-	// suppress unused variable warning when OpenCL options are not enabled
-	(void)opencl_t;
 
 	boost::log::core::get()->remove_all_sinks();
 
