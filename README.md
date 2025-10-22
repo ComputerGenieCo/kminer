@@ -16,7 +16,7 @@ This project supports 2 different solvers:
 
 ### Prerequisites
 - Ubuntu/Debian-based Linux distribution
-- GCC 16 (for CUDA compatibility, see notes below)
+- GCC 13.3 (for CUDA compatibility, see notes below)
 - CMake 3.22+
 - Boost 1.74
 - FASM assembler (for CPU_XENONCAT)
