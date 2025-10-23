@@ -1,4 +1,7 @@
-project(kminer)
+# Set policy to enable VERSION in project()
+cmake_policy(SET CMP0048 NEW)
+
+project(kminer VERSION 1.0.0)
 cmake_minimum_required(VERSION 3.16)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -12,7 +15,7 @@ option(USE_CUDA_DJEZO "USE CUDA_DJEZO" OFF)
 if (USE_CPU_XENONCAT)
     # Ensure assemble.sh is executable
     execute_process(
-        COMMAND chmod +x ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/assemble.sh
+        COMMAND chmod +x ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/assemble.sh
         RESULT_VARIABLE CHMOD_RESULT
     )
     if(NOT CHMOD_RESULT EQUAL 0)
@@ -21,21 +24,21 @@ if (USE_CPU_XENONCAT)
 
     # Custom command to generate assembly object files
     add_custom_command(
-        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.o
-               ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.o
-        COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux && ./assemble.sh
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.asm
-                ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.asm
-                ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/assemble.sh
-                ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/fasm
+        OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/equihash_avx1.o
+               ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/equihash_avx2.o
+        COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux && ./assemble.sh
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/equihash_avx1.asm
+                ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/equihash_avx2.asm
+                ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/assemble.sh
+                ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/fasm
         COMMENT "Generating CPU_XENONCAT assembly object files"
         VERBATIM
     )
 
     # Custom target to ensure assembly files are built
     add_custom_target(cpu_xenoncat_asm 
-        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.o
-                ${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.o
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/equihash_avx1.o
+                ${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/equihash_avx2.o
     )
 
     add_definitions(-DUSE_CPU_XENONCAT)
@@ -171,10 +174,10 @@ message("-- CXXFLAGS: ${CMAKE_CXX_FLAGS}")
 message("-- LIBS: ${LIBS}")
 
 if (USE_CPU_XENONCAT)
-    add_subdirectory(cpu_xenoncat)
+    add_subdirectory(solvers/cpu_xenoncat)
 endif()
 if (USE_CUDA_DJEZO)
-    add_subdirectory(cuda_djezo)
+    add_subdirectory(solvers/cuda_djezo)
 endif()
 
 #add_subdirectory(cpu_xenoncat)
@@ -190,9 +193,9 @@ if (USE_CPU_XENONCAT)
     add_dependencies(${PROJECT_NAME} cpu_xenoncat_asm)
     
     add_library ( xenoncat_avx1 SHARED IMPORTED GLOBAL )
-    set_target_properties ( xenoncat_avx1 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx1.o" )
+    set_target_properties ( xenoncat_avx1 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/equihash_avx1.o" )
     add_library ( xenoncat_avx2 SHARED IMPORTED GLOBAL )
-    set_target_properties ( xenoncat_avx2 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/cpu_xenoncat/asm_linux/equihash_avx2.o" )
+    set_target_properties ( xenoncat_avx2 PROPERTIES IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/solvers/cpu_xenoncat/asm_linux/equihash_avx2.o" )
     target_link_libraries(${PROJECT_NAME} cpu_xenoncat xenoncat_avx1 xenoncat_avx2)
 endif()
 if (USE_CUDA_DJEZO)

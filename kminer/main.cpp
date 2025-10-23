@@ -207,12 +207,11 @@ int main(int argc, char* argv[])
 {
 
 	std::cout << std::endl;
-	std::cout << "\t==================== www.nicehash.com ====================" << std::endl;
-	std::cout << "\t\tEquihash CPU&GPU Miner for NiceHash v" STANDALONE_MINER_VERSION << std::endl;
-	std::cout << "\tThanks to Zcash developers for providing base of the code." << std::endl;
-	std::cout << "\t    Special thanks to tromp, xenoncat and djeZo for providing "<< std::endl;
-	std::cout << "\t      optimized CPU and CUDA equihash solvers." << std::endl;
-	std::cout << "\t==================== www.nicehash.com ====================" << std::endl;
+	std::cout << "\t==================== ComputerGenieCo ====================" << std::endl;
+	std::cout << "\t\t\tEquihash CPU&GPU Miner v" STANDALONE_MINER_VERSION << std::endl;
+	std::cout << "\t   Special thanks to xenoncat and djeZo for providing " << std::endl;
+	std::cout << "\t\t  optimized CPU and CUDA equihash solvers." << std::endl;
+	std::cout << "\t==================== ComputerGenieCo ====================" << std::endl;
 	std::cout << std::endl;
 
 	signal(SIGINT, stratum_sigint_handler);

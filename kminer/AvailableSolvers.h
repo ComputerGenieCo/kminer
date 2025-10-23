@@ -14,12 +14,12 @@ see LICENSE file for a full copy of the GNU General Public License
 
 
 #ifdef USE_CPU_XENONCAT
-#include "../cpu_xenoncat/cpu_xenoncat.hpp"
+#include "../solvers/cpu_xenoncat/cpu_xenoncat.hpp"
 #else
 CREATE_SOLVER_STUB(cpu_xenoncat, "cpu_xenoncat_STUB")
 #endif
 #ifdef USE_CUDA_DJEZO
-#include "../cuda_djezo/cuda_djezo.hpp"
+#include "../solvers/cuda_djezo/cuda_djezo.hpp"
 #else
 CREATE_SOLVER_STUB(cuda_djezo, "cuda_djezo_STUB")
 #endif
