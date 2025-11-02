@@ -41,7 +41,7 @@ jobs:
       
       - name: Install CUDA Toolkit
         if: matrix.build_type == 'gpu' || matrix.build_type == 'cpu-gpu'
-        uses: Jimver/cuda-toolkit@v0.2.28
+        uses: Jimver/cuda-toolkit@v0.2.29
         with:
           cuda: '12.5.1'
           method: 'network'
